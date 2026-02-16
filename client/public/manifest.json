@@ -1,0 +1,38 @@
+{
+  "name": "LUMIERE 2026 Film Festival",
+  "short_name": "LUMIERE 2026",
+  "description": "Annual Film Festival - Submit and celebrate cinema",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Submit Film",
+      "url": "/submit",
+      "description": "Submit your film to the festival"
+    },
+    {
+      "name": "View Schedule",
+      "url": "/schedule",
+      "description": "View festival schedule"
+    }
+  ]
+}

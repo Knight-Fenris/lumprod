@@ -1,0 +1,4 @@
+name: Deploy Backend (DISABLED - no backend present)
+
+# This workflow is disabled because there is no backend/functions directory in this repo.
+# If you add backend code in the future, restore this workflow.

@@ -1,0 +1,99 @@
+/* Card Component Styles */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+/* Variants */
+.card--default {
+  border: 1px solid var(--text-primary);
+}
+
+.card--bordered {
+  border: 2px solid var(--text-primary);
+}
+
+.card--elevated {
+  border: 1px solid var(--text-primary);
+  box-shadow: 4px 4px 0 var(--text-primary);
+}
+
+/* Padding */
+.card--padding-none {
+  padding: 0;
+}
+
+.card--padding-small {
+  padding: 1rem;
+}
+
+.card--padding-medium {
+  padding: 1.5rem;
+}
+
+.card--padding-large {
+  padding: 2rem;
+}
+
+/* States */
+.card--hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 var(--text-primary);
+}
+
+.card--clickable {
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  font: inherit;
+  width: 100%;
+}
+
+.card--clickable:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* Card Sections */
+.card__header {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.card__body {
+  flex: 1;
+}
+
+.card__footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--text-primary);
+  margin-top: 1rem;
+}
+
+/* Remove section borders/margins in no-padding cards */
+.card--padding-none .card__header,
+.card--padding-none .card__body,
+.card--padding-none .card__footer {
+  padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .card--padding-large {
+    padding: 1.5rem;
+  }
+  
+  .card--elevated {
+    box-shadow: 2px 2px 0 var(--text-primary);
+  }
+  
+  .card--hoverable:hover {
+    box-shadow: 4px 4px 0 var(--text-primary);
+  }
+}

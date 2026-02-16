@@ -1,0 +1,81 @@
+/* Spinner Component Styles */
+
+.spinner {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.spinner__svg {
+  animation: spinner-rotate 1s linear infinite;
+}
+
+.spinner__circle {
+  stroke: var(--text-primary);
+  stroke-linecap: square;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  animation: spinner-dash 1.5s ease-in-out infinite;
+}
+
+/* Sizes */
+.spinner--small .spinner__svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.spinner--medium .spinner__svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.spinner--large .spinner__svg {
+  width: 4rem;
+  height: 4rem;
+}
+
+/* Variants */
+.spinner--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Label */
+.spinner__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Animations */
+@keyframes spinner-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
