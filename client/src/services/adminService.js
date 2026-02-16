@@ -1,0 +1,294 @@
+import { auth, db } from '../firebase';
+import { 
+  collection, 
+  doc, 
+  getDoc,
+  getDocs, 
+  updateDoc,
+  query, 
+  where,
+  orderBy,
+  limit,
+  serverTimestamp
+} from 'firebase/firestore';
+import { 
+  signInWithEmailAndPassword,
+  signOut,
+  setPersistence,
+  browserSessionPersistence
+} from 'firebase/auth';
+
+/**
+ * Admin Service
+ * Handles admin authentication and operations
+ */
+
+/**
+ * Check if user is admin
+ */
+export const isAdmin = async (userId) => {
+  try {
+    if (!userId) return false;
+
+    const adminRef = doc(db, 'admin', userId);
+    const adminDoc = await getDoc(adminRef);
+
+    return adminDoc.exists() && adminDoc.data().verified === true;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+};
+
+/**
+ * Get admin details
+ */
+export const getAdminDetails = async (userId) => {
+  try {
+    const adminRef = doc(db, 'admin', userId);
+    const adminDoc = await getDoc(adminRef);
+
+    if (adminDoc.exists()) {
+      return {
+        id: adminDoc.id,
+        ...adminDoc.data(),
+        createdAt: adminDoc.data().createdAt?.toDate?.() || adminDoc.data().createdAt,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting admin details:', error);
+    throw error;
+  }
+};
+
+/**
+ * Admin login with email/password
+ * Note: Admin account should be created manually in Firestore
+ * Collection: admin/{uid}
+ * Fields: { email, name, role: 'admin', verified: true, createdAt }
+ */
+export const adminLogin = async (email, password) => {
+  try {
+    // Set session persistence
+    await setPersistence(auth, browserSessionPersistence);
+
+    // Sign in with Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Check if user is admin
+    const adminStatus = await isAdmin(user.uid);
+    
+    if (!adminStatus) {
+      // Sign out if not admin
+      await signOut(auth);
+      throw new Error('Unauthorized: Admin access required');
+    }
+
+    // Get admin details
+    const adminDetails = await getAdminDetails(user.uid);
+
+    return {
+      success: true,
+      user,
+      admin: adminDetails
+    };
+  } catch (error) {
+    console.error('Error during admin login:', error);
+    
+    // Handle specific Firebase auth errors
+    if (error.code === 'auth/user-not-found') {
+      throw new Error('Admin account not found');
+    } else if (error.code === 'auth/wrong-password') {
+      throw new Error('Invalid password');
+    } else if (error.code === 'auth/invalid-email') {
+      throw new Error('Invalid email format');
+    } else if (error.code === 'auth/too-many-requests') {
+      throw new Error('Too many failed attempts. Please try again later.');
+    }
+    
+    throw error;
+  }
+};
+
+/**
+ * Admin logout
+ */
+export const adminLogout = async () => {
+  try {
+    await signOut(auth);
+    return { success: true };
+  } catch (error) {
+    console.error('Error during admin logout:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all users (Admin)
+ */
+export const getAllUsers = async () => {
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const users = [];
+
+    usersSnapshot.forEach((doc) => {
+      users.push({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+        updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
+        lastLoginAt: doc.data().lastLoginAt?.toDate?.() || doc.data().lastLoginAt,
+      });
+    });
+
+    return users;
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user by ID (Admin)
+ */
+export const getUserById = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists()) {
+      return {
+        id: userDoc.id,
+        ...userDoc.data(),
+        createdAt: userDoc.data().createdAt?.toDate?.() || userDoc.data().createdAt,
+        updatedAt: userDoc.data().updatedAt?.toDate?.() || userDoc.data().updatedAt,
+        lastLoginAt: userDoc.data().lastLoginAt?.toDate?.() || userDoc.data().lastLoginAt,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user:', error);
+    throw error;
+  }
+};
+
+/**
+ * Search users by email (Admin)
+ */
+export const searchUsersByEmail = async (emailQuery) => {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('email', '>=', emailQuery.toLowerCase()),
+      where('email', '<=', emailQuery.toLowerCase() + '\uf8ff')
+    );
+
+    const querySnapshot = await getDocs(q);
+    const users = [];
+
+    querySnapshot.forEach((doc) => {
+      users.push({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+      });
+    });
+
+    return users;
+  } catch (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get dashboard statistics (Admin)
+ */
+export const getDashboardStats = async () => {
+  try {
+    // Get counts from all collections
+    const [usersSnap, submissionsSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'submissions'))
+    ]);
+
+    // Calculate submission stats
+    let pendingSubmissions = 0;
+    let verifiedSubmissions = 0;
+    let totalRevenue = 0;
+
+    submissionsSnap.forEach((doc) => {
+      const data = doc.data();
+      if (data.paymentStatus === 'pending') pendingSubmissions++;
+      if (data.paymentStatus === 'verified') {
+        verifiedSubmissions++;
+        totalRevenue += data.fee || 0;
+      }
+    });
+
+    return {
+      totalUsers: usersSnap.size,
+      totalSubmissions: submissionsSnap.size,
+      totalRegistrations: submissionsSnap.size, // For backward compatibility
+      pendingRegistrations: pendingSubmissions,
+      verifiedRegistrations: verifiedSubmissions,
+      totalRevenue
+    };
+  } catch (error) {
+    console.error('Error getting dashboard stats:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update user details (Admin)
+ */
+export const updateUser = async (userId, userData) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    
+    await updateDoc(userRef, {
+      ...userData,
+      updatedAt: serverTimestamp()
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get recent activities (Admin)
+ * Get recent submissions sorted by date
+ */
+export const getRecentActivities = async (limit = 10) => {
+  try {
+    // Get recent submissions
+    const submissionsSnapshot = await getDocs(
+      query(collection(db, 'submissions'), orderBy('createdAt', 'desc'))
+    );
+
+    const activities = [];
+
+    submissionsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      activities.push({
+        type: 'submission',
+        id: doc.id,
+        ...data,
+        timestamp: data.createdAt?.toDate?.() || data.createdAt || new Date(),
+      });
+    });
+
+    return activities.slice(0, limit);
+  } catch (error) {
+    console.error('Error getting recent activities:', error);
+    throw error;
+  }
+};

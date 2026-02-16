@@ -1,0 +1,433 @@
+.categories-page {
+    width: 100vw;
+    min-height: 100vh;
+    font-family: "Inter", sans-serif;
+    color: white;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Glow */
+  .categories-page::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.12),
+      transparent 70%
+    );
+    filter: blur(90px);
+    opacity: 0.7;
+    animation: lightFloat 16s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  /* Grain */
+  .categories-page::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    background-image: url("/textures/film-grain.jpg");
+    background-size: 140% 140%;
+    opacity: 0.12;
+    mix-blend-mode: overlay;
+    animation: grainDrift 20s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  /* Hero */
+  .categories-hero-stack {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.1vh;
+    text-align: center;
+    min-height: 35vh;
+    justify-content: flex-end;
+    padding-bottom: 4vh;
+  }
+  
+  .categories-hero-title {
+    font-family: "Playfair Display", serif;
+    font-size: 4vw;
+    letter-spacing: 0.2vw;
+    color: #f5f5f5;
+  }
+  
+  .categories-hero-subtitle {
+    margin-top: -2vh;
+    font-family: "Playfair Display", serif;
+    font-size: 1.5vw;
+    opacity: 0.8;
+    color: #e6e6e6;
+  }
+  
+  /* Wrapper */
+  .categories-wrapper {
+    padding: 4vh 8vw 10vh;
+    display: flex;
+    flex-direction: column;
+    gap: 6vh;
+  }
+  
+  /* Card */
+  .category-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 4vw;
+    padding: 4vh 4vw;
+    border-radius: 2vw;
+    background: linear-gradient(135deg, #1f1f1f, #2a2a2a);
+    position: relative;
+    transition: transform 0.4s ease;  
+  }
+  
+  /* Left */
+  .category-left {
+    width: 58%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* center everything horizontally */
+    text-align: center;       /* center all text */
+  }
+  
+
+  .category-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;   
+    gap: 1vw;
+    margin-bottom: 1vh;
+    text-align: center;
+  }
+  
+  .category-icon {
+    font-size: 2.1vw;
+    line-height: 1;
+    background-color: transparent;
+    border: none;
+  }
+  
+  .category-left h2 {
+    font-family: "Cinzel", serif;
+    font-size: 2.2vw;
+    color: #f2f2f2;
+    margin-bottom: 0.5vh;
+    /* width: 75vw; */
+    text-align: center;
+}
+  
+  .category-left h3 {
+    font-size: 1.05vw;
+    color: #e6e6e6;
+    margin-bottom: 2vh;
+    text-align: center;
+  }
+  
+  .category-description {
+    font-size: 1.15vw;
+    line-height: 1.8;
+    margin-bottom: 2vh;
+    text-align: center;
+    color: #e6e6e6;
+  }
+  
+  .genre-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    gap: 0.8vw;
+    margin-top: 1vh;
+  }
+  
+  
+  .genre-list span {
+    padding: 0.5vh 1vw;
+    border: 0.12vw solid #d9d9d9;
+    border-radius: 999px;
+    font-size: 0.7vw;
+    color: #f0f0f0;
+    transition: 0.3s ease;
+  }
+  
+  .genre-list span:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .category-right {
+    width: 42%;
+    padding-left: 3vw;
+    border-left: 0.12vw solid #d9d9d9;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Info block container */
+  .info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3vh;
+  }
+  
+  /* Individual info rows */
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vh;
+  }
+  
+  .info-row span {
+    font-size: 0.7vw;
+    letter-spacing: 0.1vw;
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+  
+  .info-row p {
+    font-size: 1.35vw;
+    font-weight: 600;
+    color: #f2f2f2;
+    margin: 0;
+  }
+  
+  /* Eligibility smaller */
+  .info-row.eligibility p {
+    font-size: 0.95vw;
+    font-weight: 400;
+    color: #e6e6e6;
+  }  
+  
+  .submit-btn {
+    display: inline-block;
+    margin-top: 3vh;
+    padding: 1vh 2vw;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s ease;
+  }
+  
+  .submit-btn:hover {
+    background: #e2e2e2;
+  }
+  
+  /* Animations */
+  @keyframes lightFloat {
+    0% { transform: translate(-6%, -5%); }
+    50% { transform: translate(6%, 5%); }
+    100% { transform: translate(-6%, -5%); }
+  }
+  
+  @keyframes grainDrift {
+    0% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(-8%, 6%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+  
+.awards-section {
+    width: 100vw;
+    padding: 10vh 12vw;
+    text-align: center;
+  }
+  
+  .awards-section h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 3.9vw;
+    color: #f2f2f2;
+    margin-bottom: 2vh;
+  }
+  
+  .awards-section p {
+    font-size: 1.15vw;
+    opacity: 0.8;
+    margin-bottom: 5vh;
+    color: #e6e6e6;
+  }
+  
+  .awards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5vw;
+  }
+  
+  .award-pill {
+    padding: 0.8vh 1.5vw;
+    border: 1px solid #d9d9d9;
+    border-radius: 999px;
+    font-size: 0.9vw;
+    color: #f0f0f0;
+    background: rgba(255, 255, 255, 0.08);
+    transition: 0.3s ease;
+  }
+  
+  .award-pill:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+  
+  .final-cta {
+    width: 100vw;
+    padding: 12vh 10vw 15vh;
+    text-align: center;
+  }
+  
+  .final-cta h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 2.6vw;
+    margin-bottom: 4vh;
+    color: #f5f5f5;
+  }
+  
+  .submit-main-btn {
+    display: inline-block;
+    padding: 1.5vh 3vw;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    font-size: 1.05vw;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: 0.3s ease;
+  }
+  
+  .submit-main-btn:hover {
+    background: #e2e2e2;
+  }
+  
+  /* Slightly different color for Lumiere Sprint card */
+  .sprint-card {
+    background: linear-gradient(135deg, #4e4e4e, #3f3f3f);
+    /* You can tweak the colors above for a subtle difference */
+  }
+
+@media (max-width: 768px) {
+  .categories-hero-stack {
+    min-height: 26vh;
+    padding-bottom: 2vh;
+  }
+
+  .categories-hero-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+    letter-spacing: 0.12em;
+  }
+
+  .categories-hero-subtitle {
+    margin-top: 0;
+    font-size: 1rem;
+    padding-left: 2%;
+    
+  }
+
+  .categories-wrapper {
+    padding: 3vh 6vw 8vh;
+    gap: 4vh;
+  }
+
+  .category-card {
+    flex-direction: column;
+    gap: 3vh;
+    padding: 3vh 5vw;
+    border-radius: 18px;
+  }
+
+  .category-left,
+  .category-right {
+    width: 100%;
+  }
+
+  .category-right {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(217, 217, 217, 0.35);
+    padding-top: 2vh;
+  }
+
+  .category-title-row {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .category-icon {
+    font-size: 1.75rem;
+  }
+
+  .category-left h2 {
+    font-size: clamp(1.4rem, 6vw, 2.1rem);
+  }
+
+  .category-left h3 {
+    font-size: 0.95rem;
+  }
+
+  .category-description {
+    font-size: 0.95rem;
+  }
+
+  .genre-list {
+    gap: 0.5rem;
+  }
+
+  .genre-list span {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .info-row span {
+    font-size: 0.7rem;
+  }
+
+  .info-row p {
+    font-size: 1rem;
+  }
+
+  .info-row.eligibility p {
+    font-size: 0.9rem;
+  }
+
+  .submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .awards-section {
+    padding: 8vh 8vw;
+  }
+
+  .awards-section h2 {
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+  }
+
+  .awards-section p {
+    font-size: 0.95rem;
+  }
+
+  .awards-grid {
+    gap: 0.75rem;
+  }
+
+  .award-pill {
+    font-size: 0.8rem;
+    padding: 0.6rem 1.1rem;
+  }
+
+  .final-cta {
+    padding: 8vh 8vw 10vh;
+  }
+
+  .final-cta h2 {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+
+  .submit-main-btn {
+    font-size: 1rem;
+    padding: 1.1rem 2.5rem;
+  }
+}
