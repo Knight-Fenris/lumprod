@@ -14,8 +14,7 @@ import Home from './pages/Home';
 import AdminProtected from './components/admin/AdminProtected';
 import ScrollToTop from "./components/ScrollToTop";
 import { resetBodyScroll } from './utils/dom';
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/next"
+
 
 const routePrefetchers = {
   '/about': () => import('./pages/About'),
