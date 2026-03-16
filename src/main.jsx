@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './styles.css'
 import { addSkipLink } from './utils/accessibility'
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 // Recover from stale lazy-loaded chunks after a deploy.
 window.addEventListener('vite:preloadError', (event) => {
@@ -37,6 +39,8 @@ if ('requestIdleCallback' in window) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <Analytics />
+    <SpeedInsights />
     <App />
   </React.StrictMode>
 )
