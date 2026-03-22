@@ -18,6 +18,7 @@ import { resetBodyScroll } from './utils/dom';
 const routePrefetchers = {
   '/about': () => import('./pages/About'),
   '/team': () => import('./pages/Teams'),
+  '/sponsors': () => import('./pages/Sponsors'),
   '/fun-events': () => import('./pages/FunEvents'),
   '/categories': () => import('./pages/Categories'),
   '/guidelines': () => import('./pages/Guidelines'),
@@ -57,6 +58,7 @@ const Schedule = lazy(() => import('./pages/Schedule'));
 const Guidelines = lazy(() => import('./pages/Guidelines'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const FunEvents = lazy(() => import('./pages/FunEvents'));
+const Sponsors = lazy(() => import('./pages/Sponsors'));
 
 // Admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -66,6 +68,7 @@ const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'));
 const Events = lazy(() => import('./pages/admin/Events'));
 const Discounts = lazy(() => import('./pages/admin/Discounts'));
 const TeamPageEditor = lazy(() => import('./pages/admin/TeamPageEditor'));
+const SponsorsAdmin = lazy(() => import('./pages/admin/Sponsors'));
 const DecorativeEffects = lazy(() => import('./components/DecorativeEffects'));
 
 // Protected route wrapper
@@ -90,6 +93,7 @@ function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/sponsors" element={<Sponsors />} />
         <Route
           path="/categories"
           element={<Categories />}
@@ -180,6 +184,14 @@ function AppRoutes() {
           element={
             <AdminProtected>
               <TeamPageEditor />
+            </AdminProtected>
+          }
+        />
+        <Route
+          path="/admin/sponsors"
+          element={
+            <AdminProtected>
+              <SponsorsAdmin />
             </AdminProtected>
           }
         />

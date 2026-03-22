@@ -134,6 +134,30 @@ export const adminLogin = async (email, password) => {
     password === LOCAL_ADMIN_PASSWORD;
 
   try {
+    if (!auth) {
+      if (shouldAllowLocalFallback) {
+        const localAdmin = {
+          id: 'local-admin',
+          email: LOCAL_ADMIN_EMAIL,
+          name: 'Local Admin',
+          role: 'admin',
+          verified: true,
+          isLocalDevAdmin: true,
+          writeAccess: false,
+        };
+
+        localStorage.setItem(LOCAL_ADMIN_SESSION_KEY, JSON.stringify(localAdmin));
+
+        return {
+          success: true,
+          user: { uid: 'local-admin', email: LOCAL_ADMIN_EMAIL },
+          admin: localAdmin,
+        };
+      }
+
+      throw new Error('Firebase auth is disabled. Local admin fallback is only available on localhost.');
+    }
+
     // Set session persistence
     await setPersistence(auth, browserSessionPersistence);
 
@@ -227,6 +251,12 @@ export const getLocalAdminSession = () => {
 };
 
 export const ensureAdminWriteAccess = async () => {
+  if (!auth) {
+    throw new Error(
+      'Firebase auth is disabled. Admin write actions are unavailable in this local setup.'
+    );
+  }
+
   const currentUser = auth.currentUser;
 
   if (!currentUser) {

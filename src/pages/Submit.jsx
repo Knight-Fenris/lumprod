@@ -3,16 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebaseDb';
 import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { getAllEvents } from '../services';
 import './Submit.css';
-
-// Default categories if none exist in Firestore
-const DEFAULT_CATEGORIES = [
-  { id: 'northern-ray', name: 'The Northern Ray', desc: 'Regional Short Film (5-20 min)', fee: 150 },
-  { id: 'prism', name: 'Prism Showcase', desc: 'National Student Film (5-15 min)', fee: 150 },
-  { id: 'sprint', name: 'Lumiere Sprint', desc: '48-Hour Challenge (3-7 min)', fee: 150 },
-  { id: 'vertical', name: 'Vertical Ray', desc: 'Mobile Vertical (60 sec)', fee: 100 },
-  { id: 'Verite', name: 'Verite', desc: 'Documentary (15-30 min)', fee: 100 },
-];
 
 const WORKSHOP_CATEGORY_TOKENS = ['aperture-lab', 'script-shadow', 'splice', 'chroma'];
 const FUN_CATEGORY_TOKENS = ['under-the-stars', 'open-mic', 'face-painting', 'photo-walks'];
@@ -44,9 +36,14 @@ const generateSubmissionId = () => {
   return `LUM-2026-${timestamp}-${random}`;
 };
 
+const isLumiereSprintCategory = (category) => {
+  const value = normalize(category);
+  return value.includes('lumiere-sprint') || value.includes('lumiere_sprint');
+};
+
 export default function Submit() {
   const [step, setStep] = useState(1);
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     // Film Details
@@ -71,6 +68,8 @@ export default function Submit() {
   const [, setSelectedCategoryDetails] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const selectedCategory = categories.find((c) => c.id === formData.category);
+  const isLumiereSprint = isLumiereSprintCategory(formData.category) || isLumiereSprintCategory(selectedCategory?.name);
 
   useEffect(() => {
     loadCategories();
@@ -78,41 +77,28 @@ export default function Submit() {
 
   const loadCategories = async () => {
     try {
-      const snapshot = await getDocs(collection(db, 'events'));
-      if (snapshot.size > 0) {
-        const eventsData = [];
-        snapshot.forEach((doc) => {
-          const event = doc.data();
-          if (inferEventType(event) !== 'competition') {
-            return;
-          }
-          
-          // Try to find matching category in DEFAULT_CATEGORIES by name
-          const matchedDefault = DEFAULT_CATEGORIES.find(c => 
-            c.name.toLowerCase() === String(event.eventName || '').toLowerCase()
-          );
-          
-          // Use the DEFAULT_CATEGORIES id and fee if found, otherwise use Firebase data
-          const categoryId = matchedDefault?.id || event.category || doc.id;
-          const fee = event.regFees || matchedDefault?.fee || 150;
-          
-          eventsData.push({
-            id: categoryId,  // Use matched ID from DEFAULT_CATEGORIES or fallback
-            name: event.eventName || 'Untitled competition',
-            desc: event.briefDescription || 'Competition category',
-            fee: fee
-          });
-        });
+      const events = await getAllEvents({ forceRefresh: true });
+      const competitionEvents = events
+        .filter((event) => inferEventType(event) === 'competition')
+        .map((event) => ({
+          id: event.category || event.eventId || event.id,
+          name: event.eventName || 'Untitled competition',
+          desc: event.briefDescription || event.tagline || 'Competition category',
+          fee: Number(event.regFees) || 0,
+        }));
 
-        if (eventsData.length > 0) {
-          setCategories(eventsData);
-        } else {
-          setCategories(DEFAULT_CATEGORIES);
-        }
-      }
+      const uniqueEvents = [];
+      const seenIds = new Set();
+      competitionEvents.forEach((event) => {
+        if (seenIds.has(event.id)) return;
+        seenIds.add(event.id);
+        uniqueEvents.push(event);
+      });
+
+      setCategories(uniqueEvents);
     } catch (error) {
       console.error('Error loading categories:', error);
-      // Keep default categories on error
+      setCategories([]);
     } finally {
       setLoadingCategories(false);
     }
@@ -140,11 +126,23 @@ export default function Submit() {
 
   const validateStep = () => {
     if (step === 1) {
-      if (!formData.title || !formData.category || !formData.duration || !formData.language || !formData.synopsis) {
+      if (categories.length === 0) {
+        setError('No active competition categories are available right now. Please try again later.');
+        return false;
+      }
+      if (!formData.category) {
+        setError('Please select a category');
+        return false;
+      }
+      if (!isLumiereSprint && (!formData.title || !formData.duration || !formData.language || !formData.synopsis)) {
         setError('Please fill in all required fields');
         return false;
       }
     } else if (step === 2) {
+      if (isLumiereSprint) {
+        setError('');
+        return true;
+      }
       if (!formData.filmLink) {
         setError('Film link is required');
         return false;
@@ -166,12 +164,21 @@ export default function Submit() {
 
   const nextStep = () => {
     if (validateStep()) {
-      setStep(prev => prev + 1);
+      if (step === 1 && isLumiereSprint) {
+        setStep(3);
+        return;
+      }
+      setStep((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
-    setStep(prev => prev - 1);
+    if (step === 3 && isLumiereSprint) {
+      setStep(1);
+      setError('');
+      return;
+    }
+    setStep((prev) => prev - 1);
     setError('');
   };
 
@@ -212,53 +219,34 @@ export default function Submit() {
       const validTeamEmails = formData.teamMemberEmails.filter(email => email.trim() !== '');
       await validateUserEmails(formData.directorEmail, validTeamEmails);
       
-      const selectedCategory = categories.find(c => c.id === formData.category);
       const submissionId = generateSubmissionId();
       
-      // Get fee - try multiple approaches
-      let fee = 0;
-      
-      // Approach 1: Get from selectedCategory (loaded from Firebase)
-      if (selectedCategory && selectedCategory.fee) {
-        fee = selectedCategory.fee;
-      }
-      
-      // Approach 2: If still 0 or not found, search by name in DEFAULT_CATEGORIES
-      if (!fee && selectedCategory) {
-        const defaultByName = DEFAULT_CATEGORIES.find(c => 
-          c.name.toLowerCase() === selectedCategory.name.toLowerCase()
-        );
-        if (defaultByName) {
-          fee = defaultByName.fee;
-        }
-      }
-      
-      // Approach 3: Direct search in DEFAULT_CATEGORIES by category ID
-      if (!fee) {
-        const defaultByID = DEFAULT_CATEGORIES.find(c => c.id === formData.category);
-        if (defaultByID) {
-          fee = defaultByID.fee;
-        }
-      }
-      
-      // Approach 4: Hardcoded fallback
-      if (!fee) {
-        fee = 150;
-      }
+      const fee = Number(selectedCategory?.fee) || 0;
+      const normalizedSubmissionTitle = isLumiereSprint
+        ? 'Lumiere Sprint Team Submission'
+        : formData.title;
+      const normalizedDuration = isLumiereSprint ? 'Live Event' : formData.duration;
+      const normalizedLanguage = isLumiereSprint ? 'N/A' : formData.language;
+      const normalizedSynopsis = isLumiereSprint
+        ? 'Live competition entry - no pre-submitted film required.'
+        : formData.synopsis;
+      const normalizedFilmLink = isLumiereSprint ? '' : formData.filmLink;
+      const normalizedPosterLink = isLumiereSprint ? '' : (formData.posterLink || '');
+      const normalizedSubtitlesLink = isLumiereSprint ? '' : (formData.subtitlesLink || '');
       
       // Save submission with all team information (using lumiere_submissions collection)
-      await addDoc(collection(db, 'lumiere_submissions'), {
+      const createdSubmission = await addDoc(collection(db, 'lumiere_submissions'), {
         submissionId,
         userId: user.uid,
         userEmail: user.email,
         
         // Film info
-        title: formData.title,
+        title: normalizedSubmissionTitle,
         category: formData.category,
         categoryName: selectedCategory?.name || '',
-        synopsis: formData.synopsis,
-        duration: formData.duration,
-        language: formData.language,
+        synopsis: normalizedSynopsis,
+        duration: normalizedDuration,
+        language: normalizedLanguage,
         
         // Director/Team info
         directorName: formData.directorName,
@@ -268,12 +256,12 @@ export default function Submit() {
         totalTeamMembers: validTeamEmails.length + 1, // including director
         
         // Links
-        filmLink: formData.filmLink,
-        posterLink: formData.posterLink || '',
-        subtitlesLink: formData.subtitlesLink || '',
+        filmLink: normalizedFilmLink,
+        posterLink: normalizedPosterLink,
+        subtitlesLink: normalizedSubtitlesLink,
         
         // Fee - EXPLICITLY ensure it's a number and not 0
-        fee: parseInt(fee) || 150,
+        fee,
         
         // Status
         status: 'submitted',
@@ -283,6 +271,23 @@ export default function Submit() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
+
+      if (isLumiereSprint) {
+        navigate('/payment', {
+          state: {
+            submission: {
+              id: createdSubmission.id,
+              submissionId,
+              title: normalizedSubmissionTitle,
+              categoryName: selectedCategory?.name || '',
+              directorEmail: formData.directorEmail,
+              fee,
+              paymentStatus: 'pending'
+            }
+          }
+        });
+        return;
+      }
 
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 2000);
@@ -347,28 +352,25 @@ export default function Submit() {
             {step === 1 && (
               <div className="form-step">
                 <h2 className="step-title">Film Details</h2>
+                {isLumiereSprint ? (
+                  <p className="step-description">
+                    Lumiere Sprint is a live competition. Film upload details are not required.
+                    Continue after selecting the category to enter team details.
+                  </p>
+                ) : null}
                 
                 <div className="form-group">
-                  <label className="form-label">Film Title *</label>
-                  <input
-                    type="text"
-                    name="title"
-                    className="form-input"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Enter your film's title"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
                   <label className="form-label">Category *</label>
+                  {categories.length === 0 ? (
+                    <div className="error-message">No active competition categories available.</div>
+                  ) : null}
                   <select
                     name="category"
                     className="form-input"
                     value={formData.category}
                     onChange={handleChange}
                     required
+                    disabled={categories.length === 0}
                   >
                     <option value="">Select a category</option>
                     {categories.map(cat => (
@@ -379,48 +381,65 @@ export default function Submit() {
                   </select>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Duration (minutes) *</label>
-                    <input
-                      type="number"
-                      name="duration"
-                      className="form-input"
-                      value={formData.duration}
-                      onChange={handleChange}
-                      placeholder="e.g., 15"
-                      min="1"
-                      max="60"
-                      required
-                    />
-                  </div>
+                {!isLumiereSprint ? (
+                  <>
+                    <div className="form-group">
+                      <label className="form-label">Film Title *</label>
+                      <input
+                        type="text"
+                        name="title"
+                        className="form-input"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Enter your film's title"
+                        required
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Primary Language *</label>
-                    <input
-                      type="text"
-                      name="language"
-                      className="form-input"
-                      value={formData.language}
-                      onChange={handleChange}
-                      placeholder="e.g., Hindi, English"
-                      required
-                    />
-                  </div>
-                </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Duration (minutes) *</label>
+                        <input
+                          type="number"
+                          name="duration"
+                          className="form-input"
+                          value={formData.duration}
+                          onChange={handleChange}
+                          placeholder="e.g., 15"
+                          min="1"
+                          max="60"
+                          required
+                        />
+                      </div>
 
-                <div className="form-group">
-                  <label className="form-label">Synopsis *</label>
-                  <textarea
-                    name="synopsis"
-                    className="form-input form-textarea"
-                    value={formData.synopsis}
-                    onChange={handleChange}
-                    placeholder="Brief description of your film (100-500 characters)"
-                    rows="4"
-                    required
-                  />
-                </div>
+                      <div className="form-group">
+                        <label className="form-label">Primary Language *</label>
+                        <input
+                          type="text"
+                          name="language"
+                          className="form-input"
+                          value={formData.language}
+                          onChange={handleChange}
+                          placeholder="e.g., Hindi, English"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Synopsis *</label>
+                      <textarea
+                        name="synopsis"
+                        className="form-input form-textarea"
+                        value={formData.synopsis}
+                        onChange={handleChange}
+                        placeholder="Brief description of your film (100-500 characters)"
+                        rows="4"
+                        required
+                      />
+                    </div>
+                  </>
+                ) : null}
 
                 <div className="form-actions">
                   <button type="button" className="btn btn--primary" onClick={nextStep}>
@@ -431,7 +450,7 @@ export default function Submit() {
             )}
 
             {/* Step 2: Upload Links */}
-            {step === 2 && (
+            {step === 2 && !isLumiereSprint && (
               <div className="form-step">
                 <h2 className="step-title">Upload Links</h2>
                 <p className="step-description">

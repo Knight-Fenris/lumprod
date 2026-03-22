@@ -14,9 +14,9 @@ import {
 
 const AuthContext = createContext(null);
 const googleProvider = new GoogleAuthProvider();
-const LOCAL_TEST_EMAIL = '';
-const LOCAL_TEST_PASSWORD = '';
-const LOCAL_DEV_SESSION_KEY = '';
+const LOCAL_TEST_EMAIL = 'pdc@pec.edu.in';
+const LOCAL_TEST_PASSWORD = 'pdcamarrahe';
+const LOCAL_DEV_SESSION_KEY = 'lumiere_local_dev_user';
 
 const isLocalDev = () =>
   import.meta.env.DEV &&
@@ -37,13 +37,47 @@ export function AuthProvider({ children }) {
 
   // Keep users signed in across tab/browser restarts unless they explicitly sign out.
   useEffect(() => {
+    if (!auth) return;
     setPersistence(auth, browserLocalPersistence).catch((err) => {
       console.error('Error setting auth persistence:', err);
     });
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    if (!auth) {
+      if (isLocalDev()) {
+        try {
+          const raw = localStorage.getItem(LOCAL_DEV_SESSION_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            setUser(buildLocalDevUser(parsed.email || LOCAL_TEST_EMAIL, parsed.displayName));
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.warn('Failed to restore local dev session:', error);
+        }
+      }
+
+      setUser(null);
+      setLoading(false);
+      return () => {};
+    }
+
+    let didResolve = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (didResolve) return;
+      console.warn('Auth state check timed out. Continuing without blocking UI.');
+      setUser(null);
+      setLoading(false);
+    }, 5000);
+
+    let unsubscribe = () => {};
+
+    try {
+      unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        didResolve = true;
+        window.clearTimeout(fallbackTimer);
       if (firebaseUser) {
         if (isLocalDev()) {
           localStorage.removeItem(LOCAL_DEV_SESSION_KEY);
@@ -69,8 +103,19 @@ export function AuthProvider({ children }) {
 
       setUser(null);
       setLoading(false);
-    });
-    return unsubscribe;
+      });
+    } catch (error) {
+      console.error('Error initializing auth state listener:', error);
+      didResolve = true;
+      window.clearTimeout(fallbackTimer);
+      setUser(null);
+      setLoading(false);
+    }
+
+    return () => {
+      window.clearTimeout(fallbackTimer);
+      unsubscribe();
+    };
   }, []);
 
   const signIn = async (email, password) => {
@@ -88,10 +133,18 @@ export function AuthProvider({ children }) {
       return { user: localUser };
     }
 
+    if (!auth) {
+      throw new Error('Firebase auth is disabled. Use local dev credentials on localhost.');
+    }
+
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email, password, options = {}) => {
+    if (!auth) {
+      throw new Error('Firebase auth is disabled in local development.');
+    }
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
     // Update profile if displayName provided
@@ -113,11 +166,20 @@ export function AuthProvider({ children }) {
       }
     }
 
+    if (!auth) {
+      setUser(null);
+      return;
+    }
+
     await firebaseSignOut(auth);
     setUser(null);
   };
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error('Firebase auth is disabled in local development.');
+    }
+
     return signInWithPopup(auth, googleProvider);
   };
 

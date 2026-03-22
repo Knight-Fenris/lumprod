@@ -6,5 +6,6 @@
 export { default as analytics } from './analytics';
 export { default as performanceMonitor } from './performanceMonitor';
 export * from './eventService';
+export * from './sponsorService';
 export * from './registrationService';
 export * from './workshopSubmissionService';

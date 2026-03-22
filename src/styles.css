@@ -399,6 +399,24 @@ input, textarea, select {
   border: 1px solid var(--border-color);
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+select option,
+select optgroup {
+  background-color: #17171b;
+  color: #f2f2f2;
+}
+
+select:focus {
+  border-color: rgba(203, 165, 90, 0.45);
+}
+
 @media (max-width: 768px) {
   input,
   textarea,

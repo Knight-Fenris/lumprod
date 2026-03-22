@@ -1,15 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { submitWorkshopApplication } from '../services';
+import { getAllEvents } from '../services';
 import './WorkshopSubmit.css';
 
-const WORKSHOP_OPTIONS = [
-  { id: 'Aperture Lab', name: 'Cinematography Masterclass', type: 'Aperture Lab' },
-  { id: 'Splice', name: 'The Art of Editing', type: 'Splice' },
-  { id: 'Script & Shadow', name: 'Screenwriting Workshop', type: 'Script & Shadow' },
-  { id: 'Chroma', name: 'Design for Cinema', type: 'Chroma' },
-];
+const normalize = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-');
+
+const WORKSHOP_CATEGORY_TOKENS = ['aperture-lab', 'script-shadow', 'splice', 'chroma'];
+
+const inferEventType = (event) => {
+  const explicitType = normalize(event.eventType);
+  if (explicitType === 'workshop') return 'workshop';
+
+  const category = normalize(event.category);
+  if (WORKSHOP_CATEGORY_TOKENS.some((token) => category.includes(token))) return 'workshop';
+  return 'other';
+};
 
 export default function WorkshopSubmit() {
   const navigate = useNavigate();
@@ -17,6 +28,8 @@ export default function WorkshopSubmit() {
   const { user } = useAuth();
 
   const initialWorkshop = state?.workshop;
+  const [workshopOptions, setWorkshopOptions] = useState([]);
+  const [loadingWorkshops, setLoadingWorkshops] = useState(true);
   const [selectedWorkshopId, setSelectedWorkshopId] = useState(initialWorkshop?.id || '');
   const [formData, setFormData] = useState({
     applicantName: user?.displayName || '',
@@ -28,10 +41,46 @@ export default function WorkshopSubmit() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    const loadWorkshopOptions = async () => {
+      try {
+        const events = await getAllEvents({ forceRefresh: true });
+        const workshops = events
+          .filter((event) => inferEventType(event) === 'workshop')
+          .map((event) => ({
+            id: event.category || event.eventId || event.id,
+            name: event.eventName || 'Untitled Workshop',
+            type: event.tagline || 'Workshop',
+          }));
+
+        const uniqueWorkshops = [];
+        const seenIds = new Set();
+        workshops.forEach((workshop) => {
+          if (seenIds.has(workshop.id)) return;
+          seenIds.add(workshop.id);
+          uniqueWorkshops.push(workshop);
+        });
+
+        setWorkshopOptions(uniqueWorkshops);
+
+        if (!selectedWorkshopId && uniqueWorkshops.length > 0) {
+          setSelectedWorkshopId(uniqueWorkshops[0].id);
+        }
+      } catch (workshopError) {
+        console.error('Error loading workshops:', workshopError);
+        setWorkshopOptions([]);
+      } finally {
+        setLoadingWorkshops(false);
+      }
+    };
+
+    loadWorkshopOptions();
+  }, []);
+
   const selectedWorkshop = useMemo(() => {
     if (!selectedWorkshopId) return null;
-    return WORKSHOP_OPTIONS.find((item) => item.id === selectedWorkshopId) || null;
-  }, [selectedWorkshopId]);
+    return workshopOptions.find((item) => item.id === selectedWorkshopId) || null;
+  }, [selectedWorkshopId, workshopOptions]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -92,6 +141,18 @@ export default function WorkshopSubmit() {
     );
   }
 
+  if (loadingWorkshops) {
+    return (
+      <div className="workshop-submit-page">
+        <div className="container workshop-submit-shell">
+          <div className="workshop-submit-card">
+            <div className="loading">Loading workshops...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="workshop-submit-page">
       <div className="container workshop-submit-shell">
@@ -115,14 +176,18 @@ export default function WorkshopSubmit() {
                 value={selectedWorkshopId}
                 onChange={(event) => setSelectedWorkshopId(event.target.value)}
                 required
+                disabled={workshopOptions.length === 0}
               >
                 <option value="">Select a workshop</option>
-                {WORKSHOP_OPTIONS.map((workshop) => (
+                {workshopOptions.map((workshop) => (
                   <option key={workshop.id} value={workshop.id}>
                     {workshop.name} ({workshop.type})
                   </option>
                 ))}
               </select>
+              {workshopOptions.length === 0 ? (
+                <p className="workshop-empty-note">No active workshops are available right now.</p>
+              ) : null}
             </div>
 
             <div className="workshop-form-row">

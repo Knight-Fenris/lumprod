@@ -15,9 +15,26 @@ import {
 import { ensureAdminWriteAccess } from './adminService';
 
 const EVENTS_CACHE_TTL_MS = 60 * 1000;
+const LOCAL_FETCH_TIMEOUT_MS = 6000;
 let eventsCache = null;
 let eventsCacheAt = 0;
 let inFlightEventsPromise = null;
+
+const isLocalDev =
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const isDbReady = () => Boolean(db);
+
+const withTimeout = (promise, timeoutMs, timeoutMessage) => {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+    }),
+  ]);
+};
 
 const normalizeDateFields = (record) => ({
   ...record,
@@ -45,7 +62,16 @@ const invalidateEventsCache = () => {
 };
 
 const fetchAllEventsFromFirestore = async () => {
-  const querySnapshot = await getDocs(collection(db, 'events'));
+  if (!isDbReady()) {
+    if (isLocalDev) return [];
+    throw new Error('Firestore is not initialized.');
+  }
+
+  const querySnapshot = await withTimeout(
+    getDocs(collection(db, 'events')),
+    LOCAL_FETCH_TIMEOUT_MS,
+    'Timed out while fetching events from Firestore.'
+  );
   const events = [];
 
   querySnapshot.forEach((docItem) => {
@@ -173,6 +199,10 @@ const generateEventId = (eventName, category) => {
  */
 export const createEvent = async (eventData) => {
   try {
+    if (!isDbReady()) {
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     await ensureAdminWriteAccess();
 
     const eventId = generateEventId(eventData.eventName, eventData.category);
@@ -220,6 +250,11 @@ export const createEvent = async (eventData) => {
  */
 export const getAllEvents = async (filters = {}) => {
   try {
+    if (!isDbReady()) {
+      if (isLocalDev) return [];
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     const events = await getAllEventsCached({ forceRefresh: Boolean(filters.forceRefresh) });
 
     let filteredEvents = events;
@@ -230,6 +265,10 @@ export const getAllEvents = async (filters = {}) => {
     return sortEvents(filteredEvents);
   } catch (error) {
     console.error('Error getting events:', error);
+    if (isLocalDev && /timed out/i.test(String(error?.message || ''))) {
+      // Local development should not block the UI when Firebase is unreachable.
+      return [];
+    }
     throw new Error(`Failed to get events: ${error.message}`);
   }
 };
@@ -239,6 +278,11 @@ export const getAllEvents = async (filters = {}) => {
  */
 export const getEventById = async (eventId) => {
   try {
+    if (!isDbReady()) {
+      if (isLocalDev) return null;
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     const cached = await getAllEventsCached();
     const localMatch = cached.find((event) => event.id === eventId || event.eventId === eventId);
     if (localMatch) return localMatch;
@@ -278,6 +322,10 @@ export const getEventById = async (eventId) => {
  */
 export const updateEvent = async (docId, eventData) => {
   try {
+    if (!isDbReady()) {
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     await ensureAdminWriteAccess();
 
     const eventRef = doc(db, 'events', docId);
@@ -301,6 +349,10 @@ export const updateEvent = async (docId, eventData) => {
  */
 export const deleteEvent = async (docId, options = {}) => {
   try {
+    if (!isDbReady()) {
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     await ensureAdminWriteAccess();
 
     const eventRef = doc(db, 'events', docId);
@@ -337,6 +389,10 @@ export const deleteEvent = async (docId, options = {}) => {
  */
 export const incrementEventTeamCount = async (docId) => {
   try {
+    if (!isDbReady()) {
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     const eventRef = doc(db, 'events', docId);
     await updateDoc(eventRef, {
       currentTeams: increment(1)
@@ -353,6 +409,10 @@ export const incrementEventTeamCount = async (docId) => {
  */
 export const decrementEventTeamCount = async (docId) => {
   try {
+    if (!isDbReady()) {
+      throw new Error('Firestore is unavailable in this environment.');
+    }
+
     const eventRef = doc(db, 'events', docId);
     await updateDoc(eventRef, {
       currentTeams: increment(-1)

@@ -21,6 +21,7 @@
         color: #f2f2f2;
         font-family: "Space Grotesk", sans-serif;
         transition: opacity 220ms ease;
+        animation: app-boot-autohide 0.32s ease 6s forwards;
       }
 
       #app-boot-loader.is-hidden {
@@ -61,9 +62,17 @@
           transform: rotate(360deg);
         }
       }
+
+      @keyframes app-boot-autohide {
+        to {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
+      }
     </style>
     <title>LUMIERE 2026 | Film Festival</title>
-    <link rel="icon" type="image/png" href="/lumiere-logo.png" />
+    <link rel="icon" type="image/png" href="/logo-text.png" />
   </head>
   <body>
     <div id="app-boot-loader" role="status" aria-live="polite" aria-label="Loading Lumiere website">
@@ -73,6 +82,58 @@
         <p class="app-boot-loader__text">Loading experience...</p>
       </div>
     </div>
+    <script>
+      (function () {
+        var loader = document.getElementById('app-boot-loader');
+        if (!loader) return;
+
+        var textNode = loader.querySelector('.app-boot-loader__text');
+
+        var hide = function () {
+          loader.classList.add('is-hidden');
+          window.setTimeout(function () {
+            if (loader && loader.parentNode) {
+              loader.parentNode.removeChild(loader);
+            }
+          }, 320);
+        };
+
+        var showStartupFailure = function (reason) {
+          if (textNode) {
+            textNode.textContent = reason || 'Startup failed. Check dev server and refresh.';
+            textNode.style.color = '#ffd6d6';
+          }
+        };
+
+        window.addEventListener('lumiere:app-mounted', hide, { once: true });
+
+        // If React never mounts, keep loader visible and show a clear failure hint.
+        window.setTimeout(function () {
+          var root = document.getElementById('root');
+          var mounted = Boolean(window.__LUMIERE_APP_MOUNTED__) || Boolean(root && root.hasChildNodes());
+          if (!mounted) {
+            showStartupFailure('Startup failed. The app bundle did not mount.');
+          }
+        }, 4500);
+
+        // If there is a global startup error and app is still not mounted, expose it in loader text.
+        window.addEventListener('error', function (event) {
+          var root = document.getElementById('root');
+          var mounted = Boolean(window.__LUMIERE_APP_MOUNTED__) || Boolean(root && root.hasChildNodes());
+          if (!mounted) {
+            showStartupFailure((event && event.message) || 'Runtime error during startup.');
+          }
+        });
+        window.addEventListener('unhandledrejection', function (event) {
+          var root = document.getElementById('root');
+          var mounted = Boolean(window.__LUMIERE_APP_MOUNTED__) || Boolean(root && root.hasChildNodes());
+          if (!mounted) {
+            var reason = event && event.reason;
+            showStartupFailure(reason && reason.message ? reason.message : String(reason || 'Unhandled promise rejection during startup.'));
+          }
+        });
+      })();
+    </script>
     <div id="root"></div>
     <div id="main-content"></div>
     <script type="module" src="/src/main.jsx"></script>

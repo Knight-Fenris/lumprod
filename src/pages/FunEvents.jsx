@@ -288,9 +288,10 @@ function FunCard({ event, index, joined, joining, onJoin }) {
 export default function FunEvents() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [funSections, setFunSections] = useState({
-    preFest: DEFAULT_PRE_FEST_EVENTS.map(withFunDetailDefaults),
-    fest: DEFAULT_FEST_EVENTS.map(withFunDetailDefaults),
+    preFest: [],
+    fest: [],
   });
   const [registeredFunEvents, setRegisteredFunEvents] = useState([]);
   const [loading, setLoading] = useState({});
@@ -298,12 +299,10 @@ export default function FunEvents() {
   useEffect(() => {
     const loadManagedFunEvents = async () => {
       try {
-        const events = await getAllEvents();
+        const events = await getAllEvents({ forceRefresh: true });
         const managedFunEvents = events
           .filter((event) => inferEventType(event) === 'fun')
           .map(mapManagedFunEvent);
-
-        if (managedFunEvents.length === 0) return;
 
         const preFest = managedFunEvents.filter((event) => {
           if (event.funPhase === 'pre-fest') return true;
@@ -317,11 +316,13 @@ export default function FunEvents() {
         });
 
         setFunSections({
-          preFest: preFest.length ? preFest : DEFAULT_PRE_FEST_EVENTS.map(withFunDetailDefaults),
-          fest: fest.length ? fest : DEFAULT_FEST_EVENTS.map(withFunDetailDefaults),
+          preFest,
+          fest,
         });
       } catch (error) {
         console.error('Error loading fun events from events collection:', error);
+      } finally {
+        setEventsLoading(false);
       }
     };
 
@@ -419,6 +420,10 @@ export default function FunEvents() {
           </div>
         </div>
 
+        {eventsLoading ? <p className="fe-empty-state">Loading latest events...</p> : null}
+        {!eventsLoading && funSections.preFest.length === 0 ? (
+          <p className="fe-empty-state">Pre-fest events will be announced soon.</p>
+        ) : null}
         <div className="fe-card-grid">
           {funSections.preFest.map((event, index) => (
             <FunCard
@@ -442,6 +447,9 @@ export default function FunEvents() {
           </div>
         </div>
 
+        {!eventsLoading && funSections.fest.length === 0 ? (
+          <p className="fe-empty-state">Fest events will be announced soon.</p>
+        ) : null}
         <div className="fe-card-grid">
           {funSections.fest.map((event, index) => (
             <FunCard

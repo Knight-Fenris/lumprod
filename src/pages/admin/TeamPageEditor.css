@@ -76,6 +76,12 @@
 .team-editor-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.team-editor-actions .team-editor-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .team-editor-photo-tools {

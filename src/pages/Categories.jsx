@@ -14,7 +14,8 @@ const DEFAULT_COMPETITION_CATEGORIES = [
     duration: '3-7 min',
     eligibility: 'Open to all',
     genres: ['Prompt-based', 'Any Genre'],
-    guidelineLink: 'https://drive.google.com/file/d/1A7cn99y7l6Wo5q9_wxCuRXM48YdvL6Wa/view?usp=sharing',
+    guidelineLink:
+      'https://drive.google.com/file/d/1A7cn99y7l6Wo5q9_wxCuRXM48YdvL6Wa/view?usp=sharing',
     image: '/events/lumiere_sprint.png',
   },
   {
@@ -27,7 +28,8 @@ const DEFAULT_COMPETITION_CATEGORIES = [
     duration: '5-20 min',
     eligibility: 'Students/Youth from Punjab, Chandigarh, Haryana, HP',
     genres: ['Regional Narratives', 'Folk Adaptations', 'Social Realism', 'Rural/Urban Conflict'],
-    guidelineLink: 'https://drive.google.com/file/d/1E8YBEAbqiLD-aGhG1icJoDWZiaTYwOFA/view?usp=sharing',
+    guidelineLink:
+      'https://drive.google.com/file/d/1E8YBEAbqiLD-aGhG1icJoDWZiaTYwOFA/view?usp=sharing',
     image: '/events/northern_ray.png',
   },
   {
@@ -39,7 +41,8 @@ const DEFAULT_COMPETITION_CATEGORIES = [
     duration: '5-15 min',
     eligibility: 'Students from any recognized Indian institution',
     genres: ['Drama', 'Thriller', 'Sci-Fi', 'Comedy'],
-    guidelineLink: 'https://drive.google.com/file/d/1_CGElgr901oDoX-R-S2p-HzAmsgSEEaa/view?usp=sharing',
+    guidelineLink:
+      'https://drive.google.com/file/d/1_CGElgr901oDoX-R-S2p-HzAmsgSEEaa/view?usp=sharing',
     image: '/events/prism.png',
   },
   {
@@ -51,7 +54,8 @@ const DEFAULT_COMPETITION_CATEGORIES = [
     duration: 'Max 60 sec',
     eligibility: 'Open to all',
     genres: ['Micro-stories', 'Visual Poems', 'Comedy'],
-    guidelineLink: 'https://drive.google.com/file/d/18u9BLwIVfDDAonR3V62G0-JXvEkw3EJW/view?usp=sharing',
+    guidelineLink:
+      'https://drive.google.com/file/d/18u9BLwIVfDDAonR3V62G0-JXvEkw3EJW/view?usp=sharing',
     image: '/events/vertical_ray.png',
   },
   {
@@ -63,7 +67,8 @@ const DEFAULT_COMPETITION_CATEGORIES = [
     duration: '8-20 min',
     eligibility: 'Students from any recognized Indian institution',
     genres: ['Social Impact', 'Environmental', 'Biography'],
-    guidelineLink: 'https://drive.google.com/file/d/1iXxMapG1H-WJSs-keWxiYBcrtJwqz0Bh/view?usp=sharing',
+    guidelineLink:
+      'https://drive.google.com/file/d/1iXxMapG1H-WJSs-keWxiYBcrtJwqz0Bh/view?usp=sharing',
     image: '/events/verite.png',
   },
 ];
@@ -121,8 +126,21 @@ const normalize = (value) =>
 const inferEventType = (event) => {
   if (event.eventType) return event.eventType;
   const category = normalize(event.category);
-  if (['aperture-lab', 'script-shadow', 'splice', 'chroma'].some((token) => category.includes(token))) return 'workshop';
-  if (['tote-bag-designing', 'scriptwriting-competition', 'under-the-stars', 'open-mic', 'face-painting', 'photo-walks'].some((token) => category.includes(token))) return 'fun';
+  if (
+    ['aperture-lab', 'script-shadow', 'splice', 'chroma'].some((token) => category.includes(token))
+  )
+    return 'workshop';
+  if (
+    [
+      'tote-bag-designing',
+      'scriptwriting-competition',
+      'under-the-stars',
+      'open-mic',
+      'face-painting',
+      'photo-walks',
+    ].some((token) => category.includes(token))
+  )
+    return 'fun';
   return 'competition';
 };
 
@@ -189,7 +207,8 @@ const withDetailDefaults = (event, eventType) => {
           ? 'Skill Workshop'
           : 'Community Event'),
     description: event.description || event.briefDescription || 'Details will be updated soon.',
-    duration: event.duration || (eventType === 'competition' ? 'TBA' : 'Session details will be announced'),
+    duration:
+      event.duration || (eventType === 'competition' ? 'TBA' : 'Session details will be announced'),
     eligibility: event.eligibility || 'Open for all',
     genres: toGenres(event.genres),
     fee: Number.isFinite(feeValue) ? feeValue : 0,
@@ -260,6 +279,7 @@ const mapWorkshopEvent = (event) =>
 export default function Categories() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('competition');
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [dbCategories, setDbCategories] = useState({
     competition: [],
     workshop: [],
@@ -268,7 +288,7 @@ export default function Categories() {
   useEffect(() => {
     const loadManagedEvents = async () => {
       try {
-        const events = await getAllEvents();
+        const events = await getAllEvents({ forceRefresh: true });
         const grouped = {
           competition: [],
           workshop: [],
@@ -283,6 +303,8 @@ export default function Categories() {
         setDbCategories(grouped);
       } catch (error) {
         console.error('Error loading categories from events collection:', error);
+      } finally {
+        setLoadingCategories(false);
       }
     };
 
@@ -292,12 +314,12 @@ export default function Categories() {
   const getCategories = () => {
     switch (activeTab) {
       case 'workshop': {
-        const list = dbCategories.workshop.length ? dbCategories.workshop : DEFAULT_WORKSHOP_CATEGORIES;
+        const list = dbCategories.workshop;
         return list.map((event) => withDetailDefaults(event, 'workshop'));
       }
       case 'competition':
       default: {
-        const list = dbCategories.competition.length ? dbCategories.competition : DEFAULT_COMPETITION_CATEGORIES;
+        const list = dbCategories.competition;
         return list.map((event) => withDetailDefaults(event, 'competition'));
       }
     }
@@ -349,160 +371,116 @@ export default function Categories() {
       </div>
 
       <div className={`categories-wrapper ${activeTab === 'workshop' ? 'workshop-grid' : ''}`}>
+        {loadingCategories ? (
+          <div className="categories-empty-state">Loading latest events...</div>
+        ) : categories.length === 0 ? (
+          <div className="categories-empty-state">
+            {activeTab === 'workshop'
+              ? 'Workshops will be announced soon.'
+              : 'Competition categories will be announced soon.'}
+          </div>
+        ) : null}
+
         {categories.map((category) => (
           <div
             key={category.id}
-            className={`category-card ${activeTab === 'competition' ? 'competition-card' : 'workshop-card'}`}
+            className="category-card workshop-card"
           >
-            {activeTab === 'competition' && (
-              <>
-                <div className="category-left">
-                  <div
-                    className="category-media category-media-competition"
-                    style={{ backgroundImage: `url(${category.image})` }}
-                    aria-label={`${category.name} visual`}
-                  />
-                  <div className="category-title-row">
-                    <h2>{category.name}</h2>
-                  </div>
-                  <h3>{category.tagline}</h3>
-                  <p className="category-description">{category.description}</p>
+            <div className="category-left">
+              <div
+                className="category-media category-media-workshop"
+                style={{ backgroundImage: `url(${category.image})` }}
+                aria-label={`${category.name} visual`}
+              />
+            </div>
 
-                  <div className="genre-list">
-                    {category.genres && category.genres.map((genre) => (
-                      <span key={`${category.id}-${genre}`}>{genre}</span>
-                    ))}
-                  </div>
+            <div className="category-right">
+              <div className="category-title-row">
+                <h2>{category.name}</h2>
+              </div>
+              {activeTab === 'competition' && <h3>{category.tagline}</h3>}
+              <p className="category-description">{category.description}</p>
+
+              <div className="genre-list">
+                {category.genres && category.genres.map((genre) => (
+                  <span key={`${category.id}-${genre}`}>{genre}</span>
+                ))}
+              </div>
+
+
+              <div className="info-block">
+                <div className="info-row">
+                  <span>Venue</span>
+                  <p>{category.location}</p>
                 </div>
-
-                <div className="category-right">
-                  <div className="info-block">
-                    <div className="info-row">
-                      <span>Submission</span>
-                      <p>Rs {category.fee}</p>
-                    </div>
-
-                    <div className="info-row">
-                      <span>Duration</span>
-                      <p>{category.duration}</p>
-                    </div>
-
-                    <div className="info-row eligibility">
-                      <span>Eligibility</span>
-                      <p>{category.eligibility}</p>
-                    </div>
-
-                    <div className="event-highlights">
-                      <div className="event-highlight" title={category.scheduleLabel}>
-                        <span>When</span>
-                        <p>{category.scheduleLabel}</p>
-                      </div>
-                      <div className="event-highlight" title={category.location}>
-                        <span>Venue</span>
-                        <p>{category.location}</p>
-                      </div>
-                      <div className="event-highlight" title={category.teamLabel}>
-                        <span>Team</span>
-                        <p>{category.teamLabel}</p>
-                      </div>
-                      <div className="event-highlight" title={category.contactInfo}>
-                        <span>Contact</span>
-                        <p>{category.contactInfo}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="category-buttons">
-                    <button
-                      type="button"
-                      className="guideline-btn"
-                      onClick={() => category.guidelineLink && window.open(category.guidelineLink, '_blank')}
-                      disabled={!category.guidelineLink}
-                      title={category.guidelineLink ? 'View Guidelines' : 'Guidelines coming soon'}
-                    >
-                      Guidelines
-                    </button>
-                    <button
-                      type="button"
-                      className="submit-btn"
-                      onClick={() => navigate('/submit')}
-                    >
-                      Submit
-                    </button>
-                  </div>
+                <div className="info-row">
+                  <span>Contact</span>
+                  <p>{category.contactInfo}</p>
                 </div>
-              </>
-            )}
-
-            {activeTab === 'workshop' && (
-              <div className="card-content-centered">
-                <div
-                  className="category-media category-media-workshop"
-                  style={{ backgroundImage: `url(${category.image})` }}
-                  aria-label={`${category.name} visual`}
-                />
-                <div className="category-title-row">
-                  <h2>{category.name}</h2>
+                <div className="info-row">
+                  <span>{activeTab === 'competition' ? 'Submission' : 'Registration'}</span>
+                  <p>{category.fee > 0 ? `Rs ${category.fee}` : 'Free'}</p>
                 </div>
-                <p className="category-description">{category.description}</p>
-
-                <div className="genre-list">
-                  {category.genres && category.genres.map((genre) => (
-                    <span key={`${category.id}-${genre}`}>{genre}</span>
-                  ))}
-                </div>
-
-                <div className="event-highlights compact-grid">
+                <div className={`event-highlights ${activeTab === 'workshop' ? 'compact-grid' : ''}`.trim()}>
                   <div className="event-highlight" title={category.scheduleLabel}>
                     <span>When</span>
                     <p>{category.scheduleLabel}</p>
-                  </div>
-                  <div className="event-highlight" title={category.location}>
-                    <span>Venue</span>
-                    <p>{category.location}</p>
-                  </div>
-                  <div className="event-highlight" title={category.eligibility}>
-                    <span>Eligibility</span>
-                    <p>{category.eligibility}</p>
                   </div>
                   <div className="event-highlight" title={category.teamLabel}>
                     <span>Team</span>
                     <p>{category.teamLabel}</p>
                   </div>
-                  <div className="event-highlight wide" title={category.contactInfo}>
-                    <span>Contact</span>
-                    <p>{category.contactInfo}</p>
+                  <div className="event-highlight" title={category.duration}>
+                    <span>Duration</span>
+                    <p>{category.duration}</p>
+                  </div>
+                  <div className="event-highlight" title={category.eligibility}>
+                    <span>Eligibility</span>
+                    <p>{category.eligibility}</p>
                   </div>
                 </div>
+              </div>
 
-                <div className="category-buttons centered">
+              <div className="category-buttons centered">
+                <button
+                  type="button"
+                  className="guideline-btn"
+                  onClick={() => category.guidelineLink && window.open(category.guidelineLink, '_blank')}
+                  disabled={!category.guidelineLink}
+                  title={category.guidelineLink ? 'View Guidelines' : 'Guidelines coming soon'}
+                >
+                  Guidelines
+                </button>
+
+                {activeTab === 'competition' ? (
                   <button
                     type="button"
                     className="submit-btn"
-                    onClick={() => navigate('/submit/workshop', {
-                      state: {
-                        workshop: {
-                          id: category.id,
-                          name: category.name,
-                          type: category.id,
+                    onClick={() => navigate('/submit')}
+                  >
+                    Submit
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="submit-btn"
+                    onClick={() =>
+                      navigate('/submit/workshop', {
+                        state: {
+                          workshop: {
+                            id: category.id,
+                            name: category.name,
+                            type: category.id,
+                          },
                         },
-                      },
-                    })}
+                      })
+                    }
                   >
                     {category.fee > 0 ? `Apply (Rs ${category.fee})` : 'Apply (Free)'}
                   </button>
-                  <button
-                    type="button"
-                    className="guideline-btn"
-                    onClick={() => category.guidelineLink && window.open(category.guidelineLink, '_blank')}
-                    disabled={!category.guidelineLink}
-                    title={category.guidelineLink ? 'View Guidelines' : 'Guidelines coming soon'}
-                  >
-                    Guidelines
-                  </button>
-                </div>
+                )}
               </div>
-            )}
+            </div>
 
           </div>
         ))}
@@ -511,7 +489,10 @@ export default function Categories() {
       {activeTab === 'competition' && (
         <section className="awards-section">
           <h2>Technical & Jury Awards</h2>
-          <p>In addition to category winners, special recognition awards are given for technical excellence.</p>
+          <p>
+            In addition to category winners, special recognition awards are given for technical
+            excellence.
+          </p>
           <div className="awards-grid">
             {technicalAwards.map((award) => (
               <span key={award} className="award-pill">

@@ -39,6 +39,19 @@ export const AdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      const localAdminSession = readLocalAdminSession();
+      if (localAdminSession) {
+        setAdmin(localAdminSession);
+        setIsAdminUser(true);
+      } else {
+        setAdmin(null);
+        setIsAdminUser(false);
+      }
+      setLoading(false);
+      return () => {};
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       

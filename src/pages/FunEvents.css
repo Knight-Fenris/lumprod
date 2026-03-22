@@ -178,13 +178,17 @@
 
 .fe-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.1rem;
   margin-top: 1.55rem;
+  align-items: stretch;
 }
 
 .fe-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background:
     linear-gradient(165deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.01) 35%),
     linear-gradient(180deg, #1a1a20 0%, #111116 100%);
@@ -254,7 +258,18 @@
 .fe-card-media {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+}
+
+.fe-empty-state {
+  margin: 0 0 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  padding: 0.95rem 1rem;
+  text-align: center;
+  color: var(--fe-muted);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .fe-card-media img {
@@ -299,9 +314,10 @@
 .fe-card-body {
   position: relative;
   z-index: 1;
-  padding: 1.28rem 1.2rem 1.35rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: 0.52rem;
 }
 
@@ -364,9 +380,8 @@
   font-size: 0.84rem;
   line-height: 1.35;
   color: #f2f2f5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .fe-card-meta {
@@ -391,7 +406,8 @@
 }
 
 .fe-card-actions {
-  margin-top: 0.82rem;
+  margin-top: auto;
+  padding-top: 0.82rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -481,6 +497,10 @@
   .fe-card-grid {
     gap: 1rem;
     border-radius: 0.62rem;
+  }
+
+  .fe-card-media {
+    max-height: 460px;
   }
 
   .fe-card-body h3 {

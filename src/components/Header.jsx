@@ -9,6 +9,7 @@ import "./Header.css";
 const NAV_LINKS = [
   { href: "/about", label: "About" },
   { href: "/team", label: "Team" },
+  { href: "/sponsors", label: "Sponsors" },
   { href: "/fun-events", label: "Fun Events" },
   { href: "/categories", label: "Categories" },
   { href: "/guidelines", label: "Guidelines" },

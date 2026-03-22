@@ -158,6 +158,14 @@ function MemberEditor({
 
   const addMember = () => onChange([...members, emptyMember()]);
   const removeMember = (index) => onChange(members.filter((_, memberIndex) => memberIndex !== index));
+  const moveMember = (index, direction) => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= members.length) return;
+
+    const next = [...members];
+    [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+    onChange(next);
+  };
 
   return (
     <div className="team-editor-card">
@@ -280,6 +288,24 @@ function MemberEditor({
             <div className="team-editor-actions">
               <button
                 type="button"
+                className="team-editor-btn"
+                onClick={() => moveMember(index, 'up')}
+                disabled={index === 0}
+                title="Move up"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="team-editor-btn"
+                onClick={() => moveMember(index, 'down')}
+                disabled={index === members.length - 1}
+                title="Move down"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
                 className="team-editor-btn team-editor-btn-danger"
                 onClick={() => removeMember(index)}
               >
@@ -302,10 +328,17 @@ export default function TeamPageEditor() {
   const [status, setStatus] = useState('');
   const [draftReady, setDraftReady] = useState(false);
 
-  const docRef = useMemo(() => doc(db, 'siteContent', 'teamPage'), []);
+  const docRef = useMemo(() => (db ? doc(db, 'siteContent', 'teamPage') : null), []);
 
   useEffect(() => {
     const load = async () => {
+      if (!docRef) {
+        setStatus('Firebase is disabled in local mode. Connect valid Firebase env vars to load and save team content.');
+        setLoading(false);
+        setDraftReady(true);
+        return;
+      }
+
       if (canUseSessionStorage()) {
         try {
           const draft = window.sessionStorage.getItem(TEAM_EDITOR_DRAFT_KEY);
@@ -392,6 +425,11 @@ export default function TeamPageEditor() {
   };
 
   const handleSave = async () => {
+    if (!docRef) {
+      setStatus('Cannot save: Firebase is disabled in local mode.');
+      return;
+    }
+
     setSaving(true);
     setStatus('');
 

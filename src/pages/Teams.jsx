@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { Instagram, Linkedin, Mail, MapPin, Sparkles } from "lucide-react";
+import { Instagram, Linkedin, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { db } from '../firebaseDb';
 import { getImageUrlCandidates, toDirectImageUrl } from '../utils/imageUrl';
@@ -205,9 +205,15 @@ export default function Teams() {
     tiers: DEFAULT_TIERS,
     developers: DEFAULT_DEVELOPERS,
   });
+  const [dbStatusMessage, setDbStatusMessage] = useState('');
 
   useEffect(() => {
     const loadTeamContent = async () => {
+      if (!db) {
+        setDbStatusMessage('Local Firebase is disabled (invalid/missing key). Showing default team content.');
+        return;
+      }
+
       try {
         const snap = await getDoc(doc(db, 'siteContent', 'teamPage'));
         if (snap.exists()) {
@@ -215,6 +221,7 @@ export default function Teams() {
         }
       } catch (error) {
         console.error('Failed to load team page content:', error);
+        setDbStatusMessage('Failed to load team page content from Firebase. Showing defaults.');
       }
     };
 
@@ -241,12 +248,13 @@ export default function Teams() {
             drives Lumiere, from conveners at the top to the subheads carrying every
             detail to the finish line.
           </p>
+          {dbStatusMessage && (
+            <p className="tm-lead" style={{ color: '#d9c08e', marginTop: '0.6rem' }}>
+              {dbStatusMessage}
+            </p>
+          )}
         </div>
 
-        <div className="tm-hero-mark" aria-hidden="true">
-          <Sparkles size={22} strokeWidth={1.8} />
-          <span>Hierarchy</span>
-        </div>
       </section>
 
       <section className="tm-spotlight-wrap">
