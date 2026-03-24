@@ -201,11 +201,7 @@ const withDetailDefaults = (event, eventType) => {
     ...event,
     tagline:
       event.tagline ||
-      (eventType === 'competition'
-        ? 'Competition Category'
-        : eventType === 'workshop'
-          ? 'Skill Workshop'
-          : 'Community Event'),
+      (eventType === 'workshop' ? 'Skill Workshop' : ''),
     description: event.description || event.briefDescription || 'Details will be updated soon.',
     duration:
       event.duration || (eventType === 'competition' ? 'TBA' : 'Session details will be announced'),
@@ -398,7 +394,9 @@ export default function Categories() {
               <div className="category-title-row">
                 <h2>{category.name}</h2>
               </div>
-              {activeTab === 'competition' && <h3>{category.tagline}</h3>}
+              {activeTab === 'competition' && category.tagline && category.tagline !== 'Competition Category' && (
+                <h3>{category.tagline}</h3>
+              )}
               <p className="category-description">{category.description}</p>
 
               <div className="genre-list">

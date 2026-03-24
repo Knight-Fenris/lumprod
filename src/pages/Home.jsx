@@ -28,7 +28,7 @@ const getCountdown = () => {
 
 const categories = [
   { count: "", label: "3", name: "DAYS" },
-  { count: "", label: "15", name: "EVENTS" },
+  { count: "", label: "13", name: "EVENTS" },
   { count: "", label: "1.2L", name: "PRIZE POOL" },
   { count: "", label: "100+", name: "ENTRIES" },
 ];
