@@ -4,10 +4,11 @@ import { getSponsorsContent } from '../services/sponsorService';
 import './Sponsors.css';
 
 const FALLBACK_LOGO = '/events/undermaintenance.png';
+const LUMIERE_LOGO = '/logo-text-1.png';
 const BRAND_LOGO_FILES = [
   'Monster Energy (Presented By).png',
   'RIF (Industry and Festival partner).png',
-  'DriftX (Go karting partner).jpeg',
+  'DriftX (Go karting partner).png',
 ];
 
 const toPublicLogoUrl = (fileName) => `/Brand_Logos/${encodeURIComponent(fileName)}`;
@@ -137,7 +138,15 @@ export default function Sponsors() {
     return [drift, rif, ...remaining].filter(Boolean);
   }, [arrangedSponsors]);
 
-  const topLogos = presentedBySponsors.length > 0 ? presentedBySponsors : arrangedSponsors.slice(0, 1);
+  const headlineSponsor = useMemo(() => {
+    const normalizedIncludesMonster = (item) => String(item?.name || '').toLowerCase().includes('monster');
+    const monster = arrangedSponsors.find(normalizedIncludesMonster);
+    if (monster) return monster;
+
+    if (presentedBySponsors.length > 0) return presentedBySponsors[0];
+
+    return arrangedSponsors[0] || null;
+  }, [arrangedSponsors, presentedBySponsors]);
 
   return (
     <main className="sponsors-page">
@@ -153,49 +162,88 @@ export default function Sponsors() {
         <section className="sponsors-state">Sponsor details will be announced soon.</section>
       ) : (
         <section className="sponsors-poster-layout" aria-label="Sponsors lineup">
-          <section className="sponsors-top-slot" aria-label="Presented By">
-            <h2 className="sponsors-slot-title">Presented By</h2>
+          <section className="sponsors-top-slot" aria-label="Presented sequence">
+            {headlineSponsor ? (
+              <figure className="sponsor-poster-node sponsor-poster-node--top">
+                <div className="sponsor-poster-media sponsor-poster-media--top">
+                  <img
+                    src={headlineSponsor.logoUrl || FALLBACK_LOGO}
+                    alt={`${headlineSponsor.name || 'Sponsor'} logo`}
+                    className="sponsor-poster-logo sponsor-poster-logo--top"
+                    onError={(event) => {
+                      if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+                      event.currentTarget.dataset.fallbackApplied = 'true';
+                      event.currentTarget.src = FALLBACK_LOGO;
+                    }}
+                  />
+                </div>
+              </figure>
+            ) : null}
 
-            <div className="sponsors-top-logos">
-              {topLogos.map((sponsor) => (
-                <figure key={sponsor.id} className="sponsor-poster-node sponsor-poster-node--top">
-                  <div className="sponsor-poster-media">
-                    <img
-                      src={sponsor.logoUrl || FALLBACK_LOGO}
-                      alt={`${sponsor.name || 'Sponsor'} logo`}
-                      className="sponsor-poster-logo sponsor-poster-logo--top"
-                      onError={(event) => {
-                        if (event.currentTarget.dataset.fallbackApplied === 'true') return;
-                        event.currentTarget.dataset.fallbackApplied = 'true';
-                        event.currentTarget.src = FALLBACK_LOGO;
-                      }}
-                    />
-                  </div>
-                </figure>
-              ))}
-            </div>
+            <p className="sponsors-presents">presents</p>
+
+            <figure className="sponsor-poster-node sponsor-poster-node--lumiere">
+              <div className="sponsor-poster-media sponsor-poster-media--lumiere">
+                <img
+                  src={LUMIERE_LOGO}
+                  alt="Lumiere logo"
+                  className="sponsor-poster-logo sponsor-poster-logo--lumiere"
+                  onError={(event) => {
+                    if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+                    event.currentTarget.dataset.fallbackApplied = 'true';
+                    event.currentTarget.src = FALLBACK_LOGO;
+                  }}
+                />
+              </div>
+            </figure>
           </section>
 
           {partnerSponsors.length > 0 ? (
             <section className="sponsors-bottom-slot" aria-label="Partners">
-              {partnerSponsors.map((sponsor) => (
-                <figure key={sponsor.id} className="sponsor-poster-node sponsor-poster-node--bottom">
+              {partnerSponsors.map((sponsor) => {
+                const normalizedName = String(sponsor.name || '').toLowerCase();
+                const normalizedTier = String(sponsor.tierLabel || '').toLowerCase();
+                const partnerRole = normalizedName.includes('drift')
+                  ? 'karting'
+                  : normalizedName.includes('rif') || /industry|festival/.test(normalizedTier)
+                    ? 'industry'
+                    : 'other';
+
+                return (
+                  <figure
+                    key={sponsor.id}
+                    className={`sponsor-poster-node sponsor-poster-node--bottom sponsor-poster-node--${partnerRole}`}
+                  >
                   <p className="sponsors-partner-label">{sponsor.tierLabel}</p>
 
-                  <div className="sponsor-poster-media">
+                  <div className="sponsor-poster-media sponsor-poster-media--bottom">
                     <img
                       src={sponsor.logoUrl || FALLBACK_LOGO}
                       alt={`${sponsor.name || 'Sponsor'} logo`}
                       className="sponsor-poster-logo sponsor-poster-logo--bottom"
                       onError={(event) => {
+                        const isDrift = String(sponsor.name || '').toLowerCase().includes('drift');
+                        const driftPng = toPublicLogoUrl('DriftX (Go karting partner).png');
+
+                        if (
+                          isDrift &&
+                          event.currentTarget.dataset.driftFallbackApplied !== 'true' &&
+                          event.currentTarget.src !== driftPng
+                        ) {
+                          event.currentTarget.dataset.driftFallbackApplied = 'true';
+                          event.currentTarget.src = driftPng;
+                          return;
+                        }
+
                         if (event.currentTarget.dataset.fallbackApplied === 'true') return;
                         event.currentTarget.dataset.fallbackApplied = 'true';
                         event.currentTarget.src = FALLBACK_LOGO;
                       }}
                     />
                   </div>
-                </figure>
-              ))}
+                  </figure>
+                );
+              })}
             </section>
           ) : null}
         </section>

@@ -61,35 +61,29 @@
   min-height: 66vh;
 }
 
-.sponsors-slot-title {
-  margin: 0;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  font-size: clamp(0.86rem, 1.8vw, 1rem);
-  color: rgba(240, 206, 140, 0.95);
-}
-
 .sponsors-top-slot {
   display: grid;
-  gap: 1rem;
+  gap: 0.1rem;
   justify-items: center;
 }
 
-.sponsors-top-logos {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.sponsors-presents {
+  margin: -0.65rem 0 0.15rem;
+  font-size: clamp(1.45rem, 3.6vw, 2.3rem);
+  line-height: 1;
+  color: rgba(148, 198, 233, 0.94);
+  letter-spacing: 0.01em;
+  font-family: 'Segoe Script', 'Lucida Handwriting', cursive;
 }
 
 .sponsors-bottom-slot {
   width: 100%;
   margin-top: auto;
   display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  grid-template-areas: 'karting industry';
   gap: clamp(1rem, 4vw, 4rem);
-  align-items: end;
+  align-items: start;
 }
 
 .sponsor-poster-node {
@@ -100,12 +94,25 @@
   margin: 0;
 }
 
-.sponsor-poster-node--bottom:first-child {
-  justify-self: start;
+.sponsor-poster-node--bottom {
+  --partner-logo-width: clamp(210px, 32vw, 430px);
+  --partner-logo-height: clamp(105px, 14vw, 175px);
 }
 
-.sponsor-poster-node--bottom:nth-child(2) {
+.sponsor-poster-node--karting {
+  grid-area: karting;
+  justify-self: start;
+  --partner-logo-width: clamp(250px, 38vw, 520px);
+  --partner-logo-height: clamp(122px, 17vw, 215px);
+}
+
+.sponsor-poster-node--industry {
+  grid-area: industry;
   justify-self: end;
+}
+
+.sponsor-poster-node--other {
+  justify-self: center;
 }
 
 .sponsor-poster-media {
@@ -114,6 +121,19 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+
+.sponsor-poster-media--top {
+  min-height: clamp(120px, 15vw, 198px);
+}
+
+.sponsor-poster-media--lumiere {
+  min-height: clamp(122px, 15vw, 200px);
+}
+
+.sponsor-poster-media--bottom {
+  min-height: clamp(140px, 17vw, 220px);
+  place-items: end center;
 }
 
 .sponsor-poster-logo {
@@ -125,13 +145,18 @@
 }
 
 .sponsor-poster-logo--top {
-  width: clamp(240px, 38vw, 520px);
-  max-height: clamp(130px, 16vw, 220px);
+  width: clamp(300px, 45vw, 640px);
+  max-height: clamp(150px, 20vw, 280px);
+}
+
+.sponsor-poster-logo--lumiere {
+  width: clamp(320px, 48vw, 720px);
+  max-height: clamp(120px, 16vw, 220px);
 }
 
 .sponsor-poster-logo--bottom {
-  width: clamp(180px, 28vw, 360px);
-  max-height: clamp(92px, 12vw, 150px);
+  width: var(--partner-logo-width);
+  max-height: var(--partner-logo-height);
 }
 
 .sponsors-partner-label {
@@ -156,28 +181,47 @@
     min-height: auto;
   }
 
-  .sponsors-top-logos {
-    justify-content: center;
+  .sponsors-presents {
+    margin-top: -0.35rem;
+    font-size: clamp(1.25rem, 5.8vw, 1.9rem);
   }
 
   .sponsor-poster-logo--top {
-    width: clamp(220px, 60vw, 420px);
-    max-height: clamp(110px, 25vw, 180px);
+    width: clamp(250px, 66vw, 480px);
+    max-height: clamp(120px, 28vw, 210px);
+  }
+
+  .sponsor-poster-logo--lumiere {
+    width: clamp(250px, 72vw, 520px);
+    max-height: clamp(100px, 24vw, 180px);
   }
 
   .sponsors-bottom-slot {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'karting'
+      'industry';
     gap: 1.4rem;
   }
 
-  .sponsor-poster-node--bottom:first-child,
-  .sponsor-poster-node--bottom:nth-child(2) {
+  .sponsor-poster-node--karting,
+  .sponsor-poster-node--industry,
+  .sponsor-poster-node--other {
     justify-self: center;
   }
 
-  .sponsor-poster-logo--bottom {
-    width: clamp(170px, 52vw, 300px);
-    max-height: clamp(86px, 22vw, 130px);
+  .sponsor-poster-node--bottom {
+    --partner-logo-width: clamp(185px, 58vw, 330px);
+    --partner-logo-height: clamp(95px, 25vw, 145px);
+  }
+
+  .sponsor-poster-node--karting {
+    --partner-logo-width: clamp(220px, 68vw, 390px);
+    --partner-logo-height: clamp(110px, 28vw, 170px);
+  }
+
+  .sponsor-poster-media--bottom {
+    min-height: clamp(120px, 30vw, 180px);
   }
 
   .sponsors-partner-label {
@@ -189,10 +233,6 @@
 @media (max-width: 480px) {
   .sponsors-poster-layout {
     gap: 1.5rem;
-  }
-
-  .sponsors-slot-title {
-    font-size: 0.82rem;
   }
 
   .sponsors-partner-label {
