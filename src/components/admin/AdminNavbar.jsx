@@ -68,9 +68,6 @@ export default function AdminNavbar() {
               <Link to="/admin/team" className={isActive('/admin/team')}>
                 Team Page
               </Link>
-              <Link to="/admin/sponsors" className={isActive('/admin/sponsors')}>
-                Sponsors
-              </Link>
             </div>
 
             <div className="admin-nav-user">

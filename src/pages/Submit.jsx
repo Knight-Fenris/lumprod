@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebaseDb';
 import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
@@ -45,10 +45,13 @@ export default function Submit() {
   const [step, setStep] = useState(1);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const { state } = useLocation();
+  const preselectedCategoryId = String(state?.category?.id || '').trim();
+  const preselectedCategoryName = String(state?.category?.name || '').trim();
   const [formData, setFormData] = useState({
     // Film Details
     title: '',
-    category: '',
+    category: preselectedCategoryId,
     duration: '',
     language: '',
     synopsis: '',
@@ -74,6 +77,45 @@ export default function Submit() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+
+    const selected = categories.find((category) => category.id === formData.category) || null;
+    setSelectedCategoryDetails(selected);
+  }, [categories, formData.category]);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+
+    const hasValidCategory = categories.some((category) => category.id === formData.category);
+    if (hasValidCategory) return;
+
+    let matchedCategory = null;
+
+    if (preselectedCategoryId) {
+      const normalizedRequestedId = normalize(preselectedCategoryId);
+      matchedCategory =
+        categories.find((category) => category.id === preselectedCategoryId) ||
+        categories.find((category) => normalize(category.id) === normalizedRequestedId) ||
+        null;
+    }
+
+    if (!matchedCategory && preselectedCategoryName) {
+      const normalizedRequestedName = normalize(preselectedCategoryName);
+      matchedCategory =
+        categories.find((category) => normalize(category.name) === normalizedRequestedName) || null;
+    }
+
+    if (matchedCategory) {
+      setFormData((prev) => ({ ...prev, category: matchedCategory.id }));
+      return;
+    }
+
+    if (formData.category) {
+      setFormData((prev) => ({ ...prev, category: '' }));
+    }
+  }, [categories, formData.category, preselectedCategoryId, preselectedCategoryName]);
 
   const loadCategories = async () => {
     try {
@@ -115,12 +157,6 @@ export default function Submit() {
       });
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-      
-      // Show category details when category is selected
-      if (name === 'category') {
-        const selected = categories.find(c => c.id === value);
-        setSelectedCategoryDetails(selected || null);
-      }
     }
   };
 

@@ -68,7 +68,6 @@ const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'));
 const Events = lazy(() => import('./pages/admin/Events'));
 const Discounts = lazy(() => import('./pages/admin/Discounts'));
 const TeamPageEditor = lazy(() => import('./pages/admin/TeamPageEditor'));
-const SponsorsAdmin = lazy(() => import('./pages/admin/Sponsors'));
 const DecorativeEffects = lazy(() => import('./components/DecorativeEffects'));
 
 // Protected route wrapper
@@ -184,14 +183,6 @@ function AppRoutes() {
           element={
             <AdminProtected>
               <TeamPageEditor />
-            </AdminProtected>
-          }
-        />
-        <Route
-          path="/admin/sponsors"
-          element={
-            <AdminProtected>
-              <SponsorsAdmin />
             </AdminProtected>
           }
         />

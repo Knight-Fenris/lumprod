@@ -28,9 +28,11 @@ export default function WorkshopSubmit() {
   const { user } = useAuth();
 
   const initialWorkshop = state?.workshop;
+  const preselectedWorkshopId = String(initialWorkshop?.id || '').trim();
+  const preselectedWorkshopName = String(initialWorkshop?.name || '').trim();
   const [workshopOptions, setWorkshopOptions] = useState([]);
   const [loadingWorkshops, setLoadingWorkshops] = useState(true);
-  const [selectedWorkshopId, setSelectedWorkshopId] = useState(initialWorkshop?.id || '');
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState(preselectedWorkshopId);
   const [formData, setFormData] = useState({
     applicantName: user?.displayName || '',
     applicantPhone: '',
@@ -63,9 +65,36 @@ export default function WorkshopSubmit() {
 
         setWorkshopOptions(uniqueWorkshops);
 
-        if (!selectedWorkshopId && uniqueWorkshops.length > 0) {
-          setSelectedWorkshopId(uniqueWorkshops[0].id);
-        }
+        setSelectedWorkshopId((currentWorkshopId) => {
+          if (uniqueWorkshops.length === 0) return '';
+
+          let matchedWorkshop = null;
+
+          if (preselectedWorkshopId) {
+            const normalizedRequestedId = normalize(preselectedWorkshopId);
+            matchedWorkshop =
+              uniqueWorkshops.find((workshop) => workshop.id === preselectedWorkshopId) ||
+              uniqueWorkshops.find((workshop) => normalize(workshop.id) === normalizedRequestedId) ||
+              null;
+          }
+
+          if (!matchedWorkshop && preselectedWorkshopName) {
+            const normalizedRequestedName = normalize(preselectedWorkshopName);
+            matchedWorkshop =
+              uniqueWorkshops.find((workshop) => normalize(workshop.name) === normalizedRequestedName) ||
+              null;
+          }
+
+          if (matchedWorkshop) return matchedWorkshop.id;
+
+          const currentSelectionStillValid = uniqueWorkshops.some(
+            (workshop) => workshop.id === currentWorkshopId
+          );
+
+          if (currentSelectionStillValid) return currentWorkshopId;
+
+          return uniqueWorkshops[0].id;
+        });
       } catch (workshopError) {
         console.error('Error loading workshops:', workshopError);
         setWorkshopOptions([]);
@@ -75,7 +104,7 @@ export default function WorkshopSubmit() {
     };
 
     loadWorkshopOptions();
-  }, []);
+  }, [preselectedWorkshopId, preselectedWorkshopName]);
 
   const selectedWorkshop = useMemo(() => {
     if (!selectedWorkshopId) return null;
