@@ -213,6 +213,7 @@ const withDetailDefaults = (event, eventType) => {
     contactInfo: event.contactInfo || 'Contact details will be announced shortly.',
     teamLabel: getTeamLabel(event, eventType),
     guidelineLink: event.guidelineLink || event.pdfLink || '',
+    googleFormLink: String(event.googleFormLink || event.formLink || '').trim(),
     image:
       toDirectImageUrl(event.image) ||
       (eventType === 'competition'
@@ -240,6 +241,7 @@ const mapCompetitionEvent = (event) =>
       dateTime: event.dateTime,
       endDateTime: event.endDateTime,
       contactInfo: event.contactInfo,
+      googleFormLink: event.googleFormLink,
       isTeamEvent: event.isTeamEvent,
       minTeamMembers: event.minTeamMembers,
       maxTeamMembers: event.maxTeamMembers,
@@ -264,6 +266,7 @@ const mapWorkshopEvent = (event) =>
       endDateTime: event.endDateTime,
       contactInfo: event.contactInfo,
       guidelineLink: event.pdfLink,
+      googleFormLink: event.googleFormLink,
       isTeamEvent: event.isTeamEvent,
       minTeamMembers: event.minTeamMembers,
       maxTeamMembers: event.maxTeamMembers,
@@ -454,15 +457,38 @@ export default function Categories() {
                   <button
                     type="button"
                     className="submit-btn"
-                    onClick={() => navigate('/submit')}
+                    onClick={() => {
+                      if (category.googleFormLink) {
+                        window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
+                        return;
+                      }
+
+                      navigate('/submit', {
+                        state: {
+                          category: {
+                            id: category.id,
+                            name: category.name,
+                          },
+                        },
+                      });
+                    }}
                   >
-                    Submit
+                    {category.googleFormLink
+                      ? 'Open Form'
+                      : normalize(category.id || category.name) === 'lumiere-sprint'
+                        ? 'Register'
+                        : 'Submit'}
                   </button>
                 ) : (
                   <button
                     type="button"
                     className="submit-btn"
-                    onClick={() =>
+                    onClick={() => {
+                      if (category.googleFormLink) {
+                        window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
+                        return;
+                      }
+
                       navigate('/submit/workshop', {
                         state: {
                           workshop: {
@@ -471,10 +497,14 @@ export default function Categories() {
                             type: category.id,
                           },
                         },
-                      })
-                    }
+                      });
+                    }}
                   >
-                    {category.fee > 0 ? `Apply (Rs ${category.fee})` : 'Apply (Free)'}
+                    {category.googleFormLink
+                      ? 'Open Form'
+                      : category.fee > 0
+                        ? `Apply (Rs ${category.fee})`
+                        : 'Apply (Free)'}
                   </button>
                 )}
               </div>

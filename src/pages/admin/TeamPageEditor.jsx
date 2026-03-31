@@ -11,7 +11,6 @@ const committees = [
   'Programming',
   'Production',
   'Hospitality',
-  'Sponsorship',
   'Outreach',
   'Marketing',
   'Branding',

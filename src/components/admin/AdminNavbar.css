@@ -105,6 +105,14 @@
 }
 
 .admin-email {
+  display: inline-block;
+  width: 220px;
+  max-width: 220px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
   color: var(--text-secondary);
   font-size: 0.78rem;
   letter-spacing: 0.05em;
@@ -189,11 +197,8 @@
   }
 
   .admin-email {
-    display: inline-block;
-    max-width: 65vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 170px;
+    max-width: 170px;
     font-size: 0.72rem;
   }
 

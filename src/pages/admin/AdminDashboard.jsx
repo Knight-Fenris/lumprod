@@ -260,9 +260,6 @@ export default function AdminDashboard() {
             <Link to="/admin/registrations" className="action-btn">
               View Submissions
             </Link>
-            <Link to="/admin/sponsors" className="action-btn">
-              Manage Sponsors
-            </Link>
           </div>
         </div>
 

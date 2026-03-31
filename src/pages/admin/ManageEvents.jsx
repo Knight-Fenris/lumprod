@@ -222,6 +222,7 @@ const EMPTY_FORM = {
   briefDescription: '',
   image: '',
   pdfLink: '',
+  googleFormLink: '',
   contactInfo: '',
   isTeamEvent: false,
   minTeamMembers: 1,
@@ -401,6 +402,7 @@ export default function ManageEvents() {
       briefDescription: event.briefDescription || '',
       image: event.image || '',
       pdfLink: event.pdfLink || '',
+      googleFormLink: event.googleFormLink || '',
       contactInfo: event.contactInfo || '',
       isTeamEvent: Boolean(event.isTeamEvent),
       minTeamMembers: Number(event.minTeamMembers || 1),
@@ -487,6 +489,7 @@ export default function ManageEvents() {
         briefDescription: formData.briefDescription.trim(),
         image: imageUrl,
         pdfLink: formData.pdfLink.trim(),
+        googleFormLink: formData.googleFormLink.trim(),
         contactInfo: formData.contactInfo.trim(),
         isTeamEvent: formData.isTeamEvent,
         minTeamMembers: Number(formData.minTeamMembers || 1),
@@ -739,6 +742,17 @@ export default function ManageEvents() {
                   <label>Guideline PDF Link</label>
                   <input type="url" name="pdfLink" value={formData.pdfLink} onChange={handleChange} placeholder="https://..." />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Google Form Link (Optional)</label>
+                <input
+                  type="url"
+                  name="googleFormLink"
+                  value={formData.googleFormLink}
+                  onChange={handleChange}
+                  placeholder="https://docs.google.com/forms/..."
+                />
               </div>
 
               <div className="form-group">

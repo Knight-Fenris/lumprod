@@ -149,6 +149,7 @@ const withFunDetailDefaults = (event) => {
     contactInfo: String(event.contactInfo || '').trim(),
     teamLabel: getTeamLabel(event),
     guidelineLink: event.guidelineLink || event.pdfLink || '',
+    googleFormLink: String(event.googleFormLink || '').trim(),
   };
 };
 
@@ -187,6 +188,7 @@ const mapManagedFunEvent = (event) => {
     endDateTime: event.endDateTime,
     contactInfo: event.contactInfo,
     guidelineLink: event.pdfLink,
+    googleFormLink: event.googleFormLink,
     isTeamEvent: event.isTeamEvent,
     minTeamMembers: event.minTeamMembers,
     maxTeamMembers: event.maxTeamMembers,
@@ -195,6 +197,8 @@ const mapManagedFunEvent = (event) => {
 };
 
 function FunCard({ event, index, joined, joining, onJoin }) {
+  const hasGoogleFormLink = Boolean(event.googleFormLink);
+
   const handleMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -275,9 +279,9 @@ function FunCard({ event, index, joined, joining, onJoin }) {
             type="button"
             className={`fe-join-btn ${joined ? 'registered-btn' : ''}`}
             onClick={() => onJoin(event)}
-            disabled={joined || joining}
+            disabled={hasGoogleFormLink ? false : joined || joining}
           >
-            {joining ? 'Joining...' : joined ? 'Joined' : 'Join'}
+            {hasGoogleFormLink ? 'Open Form' : joining ? 'Joining...' : joined ? 'Joined' : 'Join'}
           </button>
         </div>
       </div>
@@ -350,6 +354,11 @@ export default function FunEvents() {
   const totalEvents = funSections.preFest.length + funSections.fest.length;
 
   const handleRegister = async (event) => {
+    if (event.googleFormLink) {
+      window.open(event.googleFormLink, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     if (!user) {
       alert('Please login to register for events');
       navigate('/login');

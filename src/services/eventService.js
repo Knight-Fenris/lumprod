@@ -224,6 +224,7 @@ export const createEvent = async (eventData) => {
       briefDescription: eventData.briefDescription || '',
       image: eventData.image || '',
       pdfLink: eventData.pdfLink || '',
+      googleFormLink: eventData.googleFormLink || '',
       contactInfo: eventData.contactInfo || '',
       defaultKey: eventData.defaultKey || '',
       seededFrom: eventData.seededFrom || '',
