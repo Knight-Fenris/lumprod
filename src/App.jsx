@@ -17,6 +17,7 @@ import { resetBodyScroll } from './utils/dom';
 
 const routePrefetchers = {
   '/about': () => import('./pages/About'),
+  '/monster-launch': () => import('./pages/MonsterLaunch'),
   '/team': () => import('./pages/Teams'),
   '/sponsors': () => import('./pages/Sponsors'),
   '/fun-events': () => import('./pages/FunEvents'),
@@ -51,6 +52,7 @@ const Submit = lazy(() => import('./pages/Submit'));
 const WorkshopSubmit = lazy(() => import('./pages/WorkshopSubmit'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Payment = lazy(() => import('./pages/Payment'));
+const MonsterLaunch = lazy(() => import('./pages/MonsterLaunch'));
 const About = lazy(() => import('./pages/About'));
 const Team = lazy(() => import('./pages/Teams'));
 const Categories = lazy(() => import('./pages/Categories'));
@@ -91,6 +93,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/monster-launch" element={<MonsterLaunch />} />
         <Route path="/team" element={<Team />} />
         <Route path="/sponsors" element={<Sponsors />} />
         <Route

@@ -5,6 +5,7 @@ import './Sponsors.css';
 
 const FALLBACK_LOGO = '/events/undermaintenance.png';
 const LUMIERE_LOGO = '/logo-text-1.png';
+const MONSTER_VIDEO = '/monster-launch-bg.mp4';
 const BRAND_LOGO_FILES = [
   'Monster Energy (Presented By).png',
   'RIF (Industry and Festival partner).png',
@@ -150,19 +151,35 @@ export default function Sponsors() {
 
   return (
     <main className="sponsors-page">
-      <section className="sponsors-hero">
-        <p className="sponsors-eyebrow">Lumiere 2026</p>
-        <h1>{content.title}</h1>
-        <p>{content.subtitle}</p>
-      </section>
-
       {loading ? (
         <section className="sponsors-state">Loading sponsors...</section>
       ) : arrangedSponsors.length === 0 ? (
         <section className="sponsors-state">Sponsor details will be announced soon.</section>
       ) : (
         <section className="sponsors-poster-layout" aria-label="Sponsors lineup">
-          <section className="sponsors-top-slot" aria-label="Presented sequence">
+          <section className="sponsors-launch-stage" aria-label="Featured sponsor reveal">
+            <div className="sponsors-launch-video-shell" aria-hidden="true">
+              <video
+                className="sponsors-launch-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+              >
+                <source src={MONSTER_VIDEO} type="video/mp4" />
+              </video>
+              <div className="sponsors-launch-video-tint" />
+              <div className="sponsors-launch-video-grid" />
+            </div>
+
+            <div className="sponsors-launch-header">
+              <p className="sponsors-eyebrow">Lumiere 2026</p>
+              <h1>{content.title}</h1>
+              <p>{content.subtitle}</p>
+            </div>
+
+            <section className="sponsors-top-slot" aria-label="Presented sequence">
             {headlineSponsor ? (
               <figure className="sponsor-poster-node sponsor-poster-node--top">
                 <div className="sponsor-poster-media sponsor-poster-media--top">
@@ -196,10 +213,12 @@ export default function Sponsors() {
                 />
               </div>
             </figure>
+            </section>
           </section>
 
           {partnerSponsors.length > 0 ? (
-            <section className="sponsors-bottom-slot" aria-label="Partners">
+            <section className="sponsors-partners-section" aria-label="Partners">
+              <div className="sponsors-bottom-slot">
               {partnerSponsors.map((sponsor) => {
                 const normalizedName = String(sponsor.name || '').toLowerCase();
                 const normalizedTier = String(sponsor.tierLabel || '').toLowerCase();
@@ -244,6 +263,7 @@ export default function Sponsors() {
                   </figure>
                 );
               })}
+              </div>
             </section>
           ) : null}
         </section>

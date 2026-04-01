@@ -1,0 +1,415 @@
+.monster-launch-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #020402;
+  color: #f7f8f2;
+}
+
+.monster-launch-video-shell {
+  position: absolute;
+  inset: 0;
+}
+
+.monster-launch-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  filter: saturate(1.08) contrast(1.08) brightness(0.46);
+}
+
+.monster-launch-video-tint {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(160, 255, 92, 0.22), transparent 24%),
+    radial-gradient(circle at 18% 18%, rgba(116, 210, 57, 0.16), transparent 32%),
+    linear-gradient(180deg, rgba(2, 4, 2, 0.3) 0%, rgba(2, 4, 2, 0.62) 48%, rgba(1, 2, 1, 0.94) 100%);
+}
+
+.monster-launch-video-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: screen;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 4px, 4px 100%;
+}
+
+.monster-launch-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.8rem;
+  background: transparent; /* make video fully visible */
+  text-align: center;
+  transition: opacity 420ms ease, visibility 420ms ease;
+}
+
+.monster-launch-loader--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.monster-launch-loader-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.72rem;
+  color: rgba(205, 247, 176, 0.82);
+}
+
+.monster-launch-loader h2 {
+  margin: 0;
+  font-size: clamp(2.2rem, 8vw, 5.5rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.monster-launch-loader h2::after {
+  content: '...';
+  display: inline-block;
+  width: 1.4ch;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: monster-launch-dots 1.2s steps(4, end) infinite;
+}
+
+.monster-launch-hero {
+  position: relative;
+  z-index: 2;
+  width: min(1240px, calc(100% - 2.4rem));
+  margin: 0 auto;
+  padding: clamp(6rem, 9vw, 8rem) 0 clamp(2.5rem, 6vw, 4rem);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.monster-launch-hero--hidden {
+  display: none;
+}
+
+.monster-launch-eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.34em;
+  font-size: 0.78rem;
+  color: rgba(220, 250, 193, 0.85);
+}
+
+.monster-launch-logo-wrap {
+  width: min(100%, 520px);
+  margin: -0.1rem auto -0.3rem;
+}
+
+.monster-launch-logo {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+}
+
+.monster-launch-presents {
+  margin: 0.65rem 0 0.1rem;
+  font-size: clamp(0.62rem, 1.05vw, 0.76rem);
+  line-height: 1;
+  color: rgba(148, 198, 233, 0.94);
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+
+.monster-launch-lumiere-wrap {
+  width: min(100%, 240px);
+  margin: -0.05rem auto 0;
+}
+
+.monster-launch-lumiere-logo {
+  display: block;
+  width: 100%;
+  max-height: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.5));
+}
+
+.monster-launch-title-wrap {
+  margin-top: -0.4rem;
+}
+
+.monster-launch-overline {
+  margin: 0 0 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.46em;
+  font-size: 0.72rem;
+  color: rgba(152, 255, 87, 0.9);
+}
+
+.monster-launch-hero h1 {
+  margin: 0;
+  font-size: clamp(4rem, 13vw, 9rem);
+  line-height: 0.86;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  text-shadow: 0 10px 42px rgba(0, 0, 0, 0.48);
+}
+
+.monster-launch-copy {
+  width: min(100%, 800px);
+  margin: 1.2rem auto 0;
+  color: rgba(244, 247, 236, 0.9);
+  line-height: 1.72;
+  font-size: clamp(1rem, 2vw, 1.12rem);
+}
+
+.monster-launch-signal {
+  margin-top: 1rem;
+  padding: 0.8rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 255, 98, 0.18);
+  background: rgba(7, 12, 7, 0.42);
+  color: rgba(225, 248, 208, 0.92);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.monster-launch-stats {
+  width: min(100%, 920px);
+  margin-top: 1.7rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.monster-launch-stat-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.25rem 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 10, 4, 0.54);
+  backdrop-filter: blur(12px);
+}
+
+.monster-launch-stat-card strong {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 0.95;
+}
+
+.monster-launch-stat-card span {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.72rem;
+  color: rgba(214, 245, 188, 0.8);
+}
+
+.monster-launch-highlights {
+  width: min(100%, 980px);
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.monster-launch-panel {
+  padding: 1.4rem 1.3rem;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 10, 5, 0.56);
+  backdrop-filter: blur(12px);
+  text-align: left;
+}
+
+.monster-launch-panel--accent {
+  border-color: rgba(167, 255, 98, 0.18);
+  background: linear-gradient(180deg, rgba(11, 19, 9, 0.78) 0%, rgba(7, 12, 7, 0.66) 100%);
+}
+
+.monster-launch-panel-kicker {
+  margin: 0 0 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  color: rgba(184, 250, 133, 0.84);
+}
+
+.monster-launch-panel h2 {
+  margin: 0 0 0.8rem;
+  font-size: clamp(1.7rem, 3.2vw, 2.7rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.monster-launch-panel p {
+  margin: 0;
+  color: rgba(240, 244, 232, 0.88);
+  line-height: 1.7;
+}
+
+.monster-launch-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgba(240, 244, 232, 0.88);
+  line-height: 1.7;
+}
+
+.monster-launch-panel li {
+  margin-bottom: 0.5rem;
+}
+
+.monster-launch-panel li:last-child {
+  margin-bottom: 0;
+}
+
+.monster-launch-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgba(240, 244, 232, 0.9);
+  line-height: 1.8;
+}
+
+.monster-launch-link-card {
+  margin-top: 1.35rem;
+  display: grid;
+  gap: 0.45rem;
+  width: min(100%, 720px);
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(170, 255, 111, 0.22);
+  border-radius: 20px;
+  background: rgba(4, 10, 4, 0.5);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+}
+
+.monster-launch-link-label {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  color: rgba(210, 245, 184, 0.76);
+}
+
+.monster-launch-link-card strong {
+  font-size: clamp(0.92rem, 1.65vw, 1.1rem);
+  word-break: break-all;
+}
+
+.monster-launch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+}
+
+.monster-launch-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.monster-launch-button:hover {
+  transform: translateY(-2px);
+}
+
+.monster-launch-button--primary {
+  background: linear-gradient(135deg, #a3ff61 0%, #6fdc32 100%);
+  color: #081106;
+  box-shadow: 0 14px 34px rgba(111, 220, 50, 0.3);
+}
+
+.monster-launch-button--secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f7f8f2;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+@keyframes monster-launch-dots {
+  0% {
+    width: 0;
+  }
+
+  100% {
+    width: 1.4ch;
+  }
+}
+
+@media (max-width: 900px) {
+  .monster-launch-stats,
+  .monster-launch-highlights {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .monster-launch-hero {
+    width: min(100%, calc(100% - 1.4rem));
+    padding-top: 6.2rem;
+    padding-bottom: 2rem;
+  }
+
+  .monster-launch-logo-wrap {
+    width: min(100%, 360px);
+    margin: 0rem auto -0.15rem;
+  }
+
+  .monster-launch-logo {
+    max-height: 210px;
+  }
+
+  .monster-launch-presents {
+    margin: 0.45rem 0 0.05rem;
+    font-size: clamp(0.58rem, 2.1vw, 0.72rem);
+    letter-spacing: 0.24em;
+  }
+
+  .monster-launch-lumiere-wrap {
+    width: min(100%, 240px);
+    margin: 0rem auto 0;
+  }
+
+  .monster-launch-lumiere-logo {
+    max-height: 68px;
+  }
+
+  .monster-launch-overline,
+  .monster-launch-eyebrow {
+    letter-spacing: 0.24em;
+  }
+
+  .monster-launch-hero h1 {
+    font-size: clamp(3.2rem, 16vw, 5.8rem);
+  }
+
+  .monster-launch-signal {
+    border-radius: 20px;
+  }
+
+  .monster-launch-stats {
+    gap: 0.8rem;
+  }
+
+  .monster-launch-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .monster-launch-button {
+    width: 100%;
+  }
+}
