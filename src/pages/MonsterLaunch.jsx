@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MonsterLaunch.css';
 
 const MONSTER_LOGO = '/Brand_Logos/Monster%20Energy%20(Presented%20By).png';
 const MONSTER_VIDEO = '/monster-launch-bg.mp4';
 const LUMIERE_LOGO = '/logo-text-1.png';
+const MIN_LOADER_DURATION_MS = 2000;
+const VIDEO_READY_FALLBACK_MS = 3500;
 
 const FEATURE_STATS = [
   { value: '1.2L', label: 'Prize Pool' },
@@ -12,29 +14,37 @@ const FEATURE_STATS = [
   { value: '3', label: 'Festival Days' },
 ];
 
-const FEATURE_HIGHLIGHTS = [
-  'Lumiere Sprint and high-intensity filmmaking challenges',
-  'Prism Showcase, Northern Ray, Vertical Ray, and Verite',
-  'DriftX go-karting competition energy inside the festival mix',
-];
-
 export default function MonsterLaunch() {
   const videoRef = useRef(null);
-  const [isVideoReady, setIsVideoReady] = useState(false);
+  const [isVideoSettled, setIsVideoSettled] = useState(false);
   const [isDelayComplete, setIsDelayComplete] = useState(false);
-  const shareUrl = useMemo(() => `${window.location.origin}/monster-launch`, []);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
+    const delayTimerId = window.setTimeout(() => {
       setIsDelayComplete(true);
-    }, 2000);
+    }, MIN_LOADER_DURATION_MS);
+
+    // If media events never fire (missing file/network/autoplay), don't block the page forever.
+    const mediaFallbackTimerId = window.setTimeout(() => {
+      setIsVideoSettled(true);
+    }, VIDEO_READY_FALLBACK_MS);
 
     return () => {
-      window.clearTimeout(timerId);
+      window.clearTimeout(delayTimerId);
+      window.clearTimeout(mediaFallbackTimerId);
     };
   }, []);
 
-  const hideLoader = isVideoReady && isDelayComplete;
+  const handleVideoReady = () => {
+    setIsVideoSettled(true);
+    if (videoRef.current && typeof videoRef.current.play === 'function') {
+      videoRef.current.play().catch(() => {
+        // Ignore autoplay block; muted + playsInline should normally work.
+      });
+    }
+  };
+
+  const hideLoader = isVideoSettled && isDelayComplete;
 
   return (
     <main className="monster-launch-page">
@@ -47,13 +57,10 @@ export default function MonsterLaunch() {
           loop
           playsInline
           preload="auto"
-          onCanPlay={() => {
-            setIsVideoReady(true);
-            if (videoRef.current && typeof videoRef.current.play === 'function') {
-              videoRef.current.play().catch(() => {
-                // Ignore autoplay block; muted + playsInline should normally work.
-              });
-            }
+          onCanPlay={handleVideoReady}
+          onLoadedData={handleVideoReady}
+          onError={() => {
+            setIsVideoSettled(true);
           }}
         >
           <source src={MONSTER_VIDEO} type="video/mp4" />
