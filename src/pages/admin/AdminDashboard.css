@@ -259,8 +259,9 @@
 
 .portal-users-table {
   width: 100%;
-  min-width: 780px;
+  min-width: 860px;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .portal-users-table th,
@@ -268,6 +269,7 @@
   padding: 0.875rem 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-align: left;
+  vertical-align: middle;
 }
 
 .portal-users-table th {
@@ -275,11 +277,61 @@
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .portal-users-table td {
   color: var(--text-primary);
   font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal-users-table .col-name {
+  width: 17%;
+}
+
+.portal-users-table .col-email {
+  width: 27%;
+}
+
+.portal-users-table .col-phone {
+  width: 16%;
+}
+
+.portal-users-table .col-college {
+  width: 26%;
+}
+
+.portal-users-table .col-signup {
+  width: 14%;
+}
+
+.portal-users-table .cell-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal-users-table .signup-cell {
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.portal-users-table .signup-date {
+  display: block;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.portal-users-table .signup-time {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
 }
 
 @media (max-width: 768px) {
@@ -328,6 +380,15 @@
 
   .download-btn {
     width: 100%;
+  }
+
+  .portal-users-table {
+    min-width: 760px;
+  }
+
+  .portal-users-table th,
+  .portal-users-table td {
+    padding: 0.75rem 0.625rem;
   }
 }
 

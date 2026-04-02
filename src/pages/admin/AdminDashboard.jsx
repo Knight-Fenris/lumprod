@@ -87,6 +87,26 @@ export default function AdminDashboard() {
     });
   };
 
+  const formatCompactSignupDate = (date) => {
+    if (!date) return { date: 'N/A', time: '' };
+
+    const d = date instanceof Date ? date : new Date(date);
+    if (Number.isNaN(d.getTime())) return { date: 'N/A', time: '' };
+
+    return {
+      date: d.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: '2-digit',
+      }),
+      time: d.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }),
+    };
+  };
+
   const escapeXml = (value) => {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -283,21 +303,30 @@ export default function AdminDashboard() {
               <table className="portal-users-table">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>College</th>
+                    <th className="col-name">Name</th>
+                    <th className="col-email">Email</th>
+                    <th className="col-phone">Phone</th>
+                    <th className="col-college">College</th>
+                    <th className="col-signup">Signup</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {portalUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td>{user.name || 'N/A'}</td>
-                      <td>{user.email || 'N/A'}</td>
-                      <td>{user.phoneNumber || 'N/A'}</td>
-                      <td>{user.collegeName || 'N/A'}</td>
-                    </tr>
-                  ))}
+                  {portalUsers.map((user) => {
+                    const signupAt = formatCompactSignupDate(user.createdAt);
+
+                    return (
+                      <tr key={user.id}>
+                        <td className="cell-truncate" title={user.name || 'N/A'}>{user.name || 'N/A'}</td>
+                        <td className="cell-truncate" title={user.email || 'N/A'}>{user.email || 'N/A'}</td>
+                        <td className="cell-truncate" title={user.phoneNumber || 'N/A'}>{user.phoneNumber || 'N/A'}</td>
+                        <td className="cell-truncate" title={user.collegeName || 'N/A'}>{user.collegeName || 'N/A'}</td>
+                        <td className="signup-cell" title={signupAt.time ? `${signupAt.date}, ${signupAt.time}` : signupAt.date}>
+                          <span className="signup-date">{signupAt.date}</span>
+                          <span className="signup-time">{signupAt.time || '-'}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
