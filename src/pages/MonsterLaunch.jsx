@@ -35,16 +35,27 @@ export default function MonsterLaunch() {
     };
   }, []);
 
+  const hideLoader = isVideoSettled && isDelayComplete;
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement || typeof videoElement.play !== 'function') {
+      return;
+    }
+
+    if (!hideLoader) {
+      videoElement.pause();
+      return;
+    }
+
+    videoElement.play().catch(() => {
+      // Ignore autoplay block; muted + playsInline should normally work.
+    });
+  }, [hideLoader]);
+
   const handleVideoReady = () => {
     setIsVideoSettled(true);
-    if (videoRef.current && typeof videoRef.current.play === 'function') {
-      videoRef.current.play().catch(() => {
-        // Ignore autoplay block; muted + playsInline should normally work.
-      });
-    }
   };
-
-  const hideLoader = isVideoSettled && isDelayComplete;
 
   return (
     <main className="monster-launch-page">
@@ -52,7 +63,6 @@ export default function MonsterLaunch() {
         <video
           ref={videoRef}
           className="monster-launch-video"
-          autoPlay
           muted
           loop
           playsInline
@@ -71,7 +81,15 @@ export default function MonsterLaunch() {
 
       <div className={`monster-launch-loader ${hideLoader ? 'monster-launch-loader--hidden' : ''}`}>
         <p className="monster-launch-loader-kicker">Monster Energy x Lumiere 2026</p>
-        <h2>Launching</h2>
+        <h2>
+          Launching
+          <span className="monster-launch-loader-dots" aria-hidden="true">
+            <span className="monster-launch-loader-dot">.</span>
+            <span className="monster-launch-loader-dot">.</span>
+            <span className="monster-launch-loader-dot">.</span>
+          </span>
+        </h2>
+        <div className="monster-launch-loader-progress" aria-hidden="true" />
       </div>
 
       <section className={`monster-launch-hero ${hideLoader ? '' : 'monster-launch-hero--hidden'}`}>
