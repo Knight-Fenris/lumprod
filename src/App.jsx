@@ -1,36 +1,36 @@
 import { lazy } from 'react';
 import * as React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './AuthContext';
-import { AdminProvider } from './contexts/AdminContext';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { LoadingProvider } from './contexts/LoadingContext';
-import ErrorBoundary from './components/ErrorBoundary';
-import LazyLoad from './components/LazyLoad';
-import Header from './components/Header';
-import SiteFooter from './components/SiteFooter';
-import AppLoadingScreen from './components/AppLoadingScreen';
-import Home from './pages/Home';
-import AdminProtected from './components/admin/AdminProtected';
-import ScrollToTop from "./components/ScrollToTop";
+import { AuthProvider, useAuth } from './features/auth/context/AuthContext';
+import { AdminProvider } from './features/admin/context/AdminContext';
+import { NotificationProvider } from './features/shared-ui/contexts/NotificationContext';
+import { LoadingProvider } from './features/shared-ui/contexts/LoadingContext';
+import ErrorBoundary from './features/shared-ui/components/ErrorBoundary';
+import LazyLoad from './features/shared-ui/components/LazyLoad';
+import Header from './features/shared-ui/components/Header';
+import SiteFooter from './features/shared-ui/components/SiteFooter';
+import AppLoadingScreen from './features/shared-ui/components/AppLoadingScreen';
+import Home from './features/events/pages/Home';
+import AdminProtected from './features/admin/components/AdminProtected';
+import ScrollToTop from "./features/shared-ui/components/ScrollToTop";
 import { resetBodyScroll } from './utils/dom';
 
 const routePrefetchers = {
-  '/about': () => import('./pages/About'),
-  '/monster-launch': () => import('./pages/MonsterLaunch'),
-  '/team': () => import('./pages/Teams'),
-  '/sponsors': () => import('./pages/Sponsors'),
-  '/fun-events': () => import('./pages/FunEvents'),
-  '/categories': () => import('./pages/Categories'),
-  '/guidelines': () => import('./pages/Guidelines'),
-  '/faq': () => import('./pages/FAQ'),
-  '/schedule': () => import('./pages/Schedule'),
-  '/login': () => import('./pages/Login'),
-  '/register': () => import('./pages/Register'),
-  '/submit': () => import('./pages/Submit'),
-  '/dashboard': () => import('./pages/Dashboard'),
-  '/payment': () => import('./pages/Payment'),
-  '/admin/login': () => import('./pages/admin/AdminLogin'),
+  '/about': () => import('./features/events/pages/About'),
+  '/monster-launch': () => import('./features/events/pages/MonsterLaunch'),
+  '/team': () => import('./features/events/pages/Teams'),
+  '/sponsors': () => import('./features/events/pages/Sponsors'),
+  '/fun-events': () => import('./features/events/pages/FunEvents'),
+  '/categories': () => import('./features/events/pages/Categories'),
+  '/guidelines': () => import('./features/events/pages/Guidelines'),
+  '/faq': () => import('./features/events/pages/FAQ'),
+  '/schedule': () => import('./features/events/pages/Schedule'),
+  '/login': () => import('./features/auth/pages/Login'),
+  '/register': () => import('./features/auth/pages/Register'),
+  '/submit': () => import('./features/submissions/pages/Submit'),
+  '/dashboard': () => import('./features/submissions/pages/Dashboard'),
+  '/payment': () => import('./features/submissions/pages/Payment'),
+  '/admin/login': () => import('./features/admin/pages/AdminLogin'),
 };
 
 const prefetchedRoutes = new Set();
@@ -46,31 +46,31 @@ export const prefetchRoute = (path) => {
 
 
 // Lazy load pages for better performance
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const Submit = lazy(() => import('./pages/Submit'));
-const WorkshopSubmit = lazy(() => import('./pages/WorkshopSubmit'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Payment = lazy(() => import('./pages/Payment'));
-const MonsterLaunch = lazy(() => import('./pages/MonsterLaunch'));
-const About = lazy(() => import('./pages/About'));
-const Team = lazy(() => import('./pages/Teams'));
-const Categories = lazy(() => import('./pages/Categories'));
-const Schedule = lazy(() => import('./pages/Schedule'));
-const Guidelines = lazy(() => import('./pages/Guidelines'));
-const FAQ = lazy(() => import('./pages/FAQ'));
-const FunEvents = lazy(() => import('./pages/FunEvents'));
-const Sponsors = lazy(() => import('./pages/Sponsors'));
+const Login = lazy(() => import('./features/auth/pages/Login'));
+const Register = lazy(() => import('./features/auth/pages/Register'));
+const Submit = lazy(() => import('./features/submissions/pages/Submit'));
+const WorkshopSubmit = lazy(() => import('./features/submissions/pages/WorkshopSubmit'));
+const Dashboard = lazy(() => import('./features/submissions/pages/Dashboard'));
+const Payment = lazy(() => import('./features/submissions/pages/Payment'));
+const MonsterLaunch = lazy(() => import('./features/events/pages/MonsterLaunch'));
+const About = lazy(() => import('./features/events/pages/About'));
+const Team = lazy(() => import('./features/events/pages/Teams'));
+const Categories = lazy(() => import('./features/events/pages/Categories'));
+const Schedule = lazy(() => import('./features/events/pages/Schedule'));
+const Guidelines = lazy(() => import('./features/events/pages/Guidelines'));
+const FAQ = lazy(() => import('./features/events/pages/FAQ'));
+const FunEvents = lazy(() => import('./features/events/pages/FunEvents'));
+const Sponsors = lazy(() => import('./features/events/pages/Sponsors'));
 
 // Admin pages
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const Registrations = lazy(() => import('./pages/admin/Registrations'));
-const ManageEvents = lazy(() => import('./pages/admin/ManageEvents'));
-const Events = lazy(() => import('./pages/admin/Events'));
-const Discounts = lazy(() => import('./pages/admin/Discounts'));
-const TeamPageEditor = lazy(() => import('./pages/admin/TeamPageEditor'));
-const DecorativeEffects = lazy(() => import('./components/DecorativeEffects'));
+const AdminLogin = lazy(() => import('./features/admin/pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./features/admin/pages/AdminDashboard'));
+const Registrations = lazy(() => import('./features/admin/pages/Registrations'));
+const ManageEvents = lazy(() => import('./features/admin/pages/ManageEvents'));
+const Events = lazy(() => import('./features/admin/pages/Events'));
+const Discounts = lazy(() => import('./features/admin/pages/Discounts'));
+const TeamPageEditor = lazy(() => import('./features/admin/pages/TeamPageEditor'));
+const DecorativeEffects = lazy(() => import('./features/shared-ui/components/DecorativeEffects'));
 
 // Protected route wrapper
 function ProtectedRoute({ children }) {

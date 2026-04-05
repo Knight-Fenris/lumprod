@@ -152,8 +152,8 @@ window.addEventListener('unhandledrejection', (event) => {
 const deferredInit = async () => {
   try {
     const [analyticsModule, performanceModule, serviceWorkerModule] = await Promise.all([
-      import('./services/analytics'),
-      import('./services/performanceMonitor'),
+      import('./services/analytics.service'),
+      import('./services/performance-monitor.service'),
       import('./utils/serviceWorker'),
     ])
 
