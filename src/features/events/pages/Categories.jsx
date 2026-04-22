@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllEvents } from '../../../services';
 import { toDirectImageUrl } from '../../../utils/imageUrl';
+import { REGISTRATIONS_OPEN, REGISTRATION_CLOSED_SHORT_MESSAGE } from '../../../config/eventStatus';
 import './Categories.css';
 
 const DEFAULT_COMPETITION_CATEGORIES = [
@@ -453,58 +454,69 @@ export default function Categories() {
                   Guidelines
                 </button>
 
-                {activeTab === 'competition' ? (
-                  <button
-                    type="button"
-                    className="submit-btn"
-                    onClick={() => {
-                      if (category.googleFormLink) {
-                        window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
-                        return;
-                      }
+                {REGISTRATIONS_OPEN ? (
+                  activeTab === 'competition' ? (
+                    <button
+                      type="button"
+                      className="submit-btn"
+                      onClick={() => {
+                        if (category.googleFormLink) {
+                          window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
+                          return;
+                        }
 
-                      navigate('/submit', {
-                        state: {
-                          category: {
-                            id: category.id,
-                            name: category.name,
+                        navigate('/submit', {
+                          state: {
+                            category: {
+                              id: category.id,
+                              name: category.name,
+                            },
                           },
-                        },
-                      });
-                    }}
-                  >
-                    {category.googleFormLink
-                      ? 'Open Form'
-                      : normalize(category.id || category.name) === 'lumiere-sprint'
-                        ? 'Register'
-                        : 'Submit'}
-                  </button>
+                        });
+                      }}
+                    >
+                      {category.googleFormLink
+                        ? 'Open Form'
+                        : normalize(category.id || category.name) === 'lumiere-sprint'
+                          ? 'Register'
+                          : 'Submit'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="submit-btn"
+                      onClick={() => {
+                        if (category.googleFormLink) {
+                          window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
+                          return;
+                        }
+
+                        navigate('/submit/workshop', {
+                          state: {
+                            workshop: {
+                              id: category.id,
+                              name: category.name,
+                              type: category.id,
+                            },
+                          },
+                        });
+                      }}
+                    >
+                      {category.googleFormLink
+                        ? 'Open Form'
+                        : category.fee > 0
+                          ? `Apply (Rs ${category.fee})`
+                          : 'Apply (Free)'}
+                    </button>
+                  )
                 ) : (
                   <button
                     type="button"
                     className="submit-btn"
-                    onClick={() => {
-                      if (category.googleFormLink) {
-                        window.open(category.googleFormLink, '_blank', 'noopener,noreferrer');
-                        return;
-                      }
-
-                      navigate('/submit/workshop', {
-                        state: {
-                          workshop: {
-                            id: category.id,
-                            name: category.name,
-                            type: category.id,
-                          },
-                        },
-                      });
-                    }}
+                    disabled
+                    title={REGISTRATION_CLOSED_SHORT_MESSAGE}
                   >
-                    {category.googleFormLink
-                      ? 'Open Form'
-                      : category.fee > 0
-                        ? `Apply (Rs ${category.fee})`
-                        : 'Apply (Free)'}
+                    Closed
                   </button>
                 )}
               </div>

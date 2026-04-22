@@ -210,7 +210,7 @@ export default function Home() {
           <img src="/logo-text.png" alt="Lumiere" className="hm-hero-logo" />
           <p className="hm-hero-subtitle">film festival</p><div className="hm-hero-timer" aria-live="polite">
             {countdown.live ? (
-              <span className="hm-hero-live">Live Now</span>
+              <span className="hm-hero-live">EVENT ENDED</span>
             ) : (
               <>
                 <span className="hm-hero-timer-block">{countdown.days}</span>
@@ -238,7 +238,7 @@ export default function Home() {
           </div>
           <div className="hm-hero-actions">
             <Link to="/categories" className="hm-btn hm-btn-primary">
-              Register
+              Explore Events
             </Link>
             <Link to="/about" className="hm-btn hm-btn-secondary">
               Explore Festival

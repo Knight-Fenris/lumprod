@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthContext';
 import { getAllEvents, getUserRegistrations, registerForEvent } from '../../../services';
 import { toDirectImageUrl } from '../../../utils/imageUrl';
+import { REGISTRATIONS_OPEN, REGISTRATION_CLOSED_SHORT_MESSAGE } from '../../../config/eventStatus';
 import './FunEvents.css';
 
 const DEFAULT_PRE_FEST_EVENTS = [
@@ -198,6 +199,7 @@ const mapManagedFunEvent = (event) => {
 
 function FunCard({ event, index, joined, joining, onJoin }) {
   const hasGoogleFormLink = Boolean(event.googleFormLink);
+  const registrationsClosed = !REGISTRATIONS_OPEN;
 
   const handleMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -279,9 +281,18 @@ function FunCard({ event, index, joined, joining, onJoin }) {
             type="button"
             className={`fe-join-btn ${joined ? 'registered-btn' : ''}`}
             onClick={() => onJoin(event)}
-            disabled={hasGoogleFormLink ? false : joined || joining}
+            disabled={registrationsClosed || (hasGoogleFormLink ? false : joined || joining)}
+            title={registrationsClosed ? REGISTRATION_CLOSED_SHORT_MESSAGE : ''}
           >
-            {hasGoogleFormLink ? 'Open Form' : joining ? 'Joining...' : joined ? 'Joined' : 'Join'}
+            {registrationsClosed
+              ? 'Closed'
+              : hasGoogleFormLink
+                ? 'Open Form'
+                : joining
+                  ? 'Joining...'
+                  : joined
+                    ? 'Joined'
+                    : 'Join'}
           </button>
         </div>
       </div>
@@ -354,6 +365,11 @@ export default function FunEvents() {
   const totalEvents = funSections.preFest.length + funSections.fest.length;
 
   const handleRegister = async (event) => {
+    if (!REGISTRATIONS_OPEN) {
+      alert(REGISTRATION_CLOSED_SHORT_MESSAGE);
+      return;
+    }
+
     if (event.googleFormLink) {
       window.open(event.googleFormLink, '_blank', 'noopener,noreferrer');
       return;

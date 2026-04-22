@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { useAuth } from "../../auth/context/AuthContext";
 import { prefetchRoute } from "../../../App";
 import { lockBodyScroll, unlockBodyScroll } from "../../../utils/dom";
 import "./Header.css";
@@ -40,7 +39,6 @@ export default function Header() {
     };
   }, [location.pathname]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
 
   /* Close mobile menu on route change */
   useEffect(() => {
@@ -107,15 +105,9 @@ export default function Header() {
 
         {/* ACTIONS */}
         <div className="header-actions">
-          {user ? (
-            <Link to="/dashboard" className="cta-stack cta-stack-dashboard" aria-label="Dashboard">
-              <span className="cta-label">Dashboard</span>
-            </Link>
-          ) : (
-            <Link to="/register" className="cta-stack" aria-label="Sign up">
-              <span className="cta-label">Sign Up</span>
-            </Link>
-          )}
+          <Link to="/schedule" className="cta-stack" aria-label="Schedule">
+            <span className="cta-label">Schedule</span>
+          </Link>
         </div>
       </div>
 
@@ -163,34 +155,20 @@ export default function Header() {
 
           <div className="mobile-divider" />
 
-          {user ? (
-            <>
-              <Link
-                to="/dashboard"
-                className="nav-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="nav-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="nav-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
+          <Link
+            to="/schedule"
+            className="nav-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Schedule
+          </Link>
+          <Link
+            to="/login"
+            className="nav-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Sign In
+          </Link>
 
         </div>
       </div>

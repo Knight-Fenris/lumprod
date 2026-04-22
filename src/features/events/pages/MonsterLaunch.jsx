@@ -168,8 +168,8 @@ export default function MonsterLaunch() {
         </section>
 
         <div className="monster-launch-actions">
-          <Link to="/register" className="monster-launch-button monster-launch-button--primary">
-            Register For Lumiere
+          <Link to="/schedule" className="monster-launch-button monster-launch-button--primary">
+            View Festival Schedule
           </Link>
           <Link to="/" className="monster-launch-button monster-launch-button--secondary">
             Explore Lumiere

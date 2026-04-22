@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { REGISTRATION_CLOSED_SHORT_MESSAGE } from '../../../config/eventStatus';
 import './Guidelines.css';
 
 const submissionRules = [
@@ -29,7 +29,6 @@ const submissionRules = [
 ];
 
 export default function Guidelines() {
-  const navigate = useNavigate();
   return (
     <div className="guideline-page">
       <div className="container">
@@ -115,13 +114,14 @@ export default function Guidelines() {
 
         {/* CTA */}
       <section className="final-cta">
-        <h2>Ready to Showcase Your Vision?</h2>
+        <h2>Submissions Closed</h2>
         <button
           type="button"
           className="submit-main-btn"
-          onClick={() => navigate('/submit')}
+          disabled
+          title={REGISTRATION_CLOSED_SHORT_MESSAGE}
         >
-          Submit video
+          Registrations Closed
         </button>
       </section>
       </div>

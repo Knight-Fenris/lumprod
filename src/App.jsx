@@ -10,10 +10,12 @@ import LazyLoad from './features/shared-ui/components/LazyLoad';
 import Header from './features/shared-ui/components/Header';
 import SiteFooter from './features/shared-ui/components/SiteFooter';
 import AppLoadingScreen from './features/shared-ui/components/AppLoadingScreen';
+import RegistrationsClosed from './features/shared-ui/components/RegistrationsClosed';
 import Home from './features/events/pages/Home';
 import AdminProtected from './features/admin/components/AdminProtected';
 import ScrollToTop from "./features/shared-ui/components/ScrollToTop";
 import { resetBodyScroll } from './utils/dom';
+import { REGISTRATIONS_OPEN } from './config/eventStatus';
 
 const routePrefetchers = {
   '/about': () => import('./features/events/pages/About'),
@@ -26,10 +28,14 @@ const routePrefetchers = {
   '/faq': () => import('./features/events/pages/FAQ'),
   '/schedule': () => import('./features/events/pages/Schedule'),
   '/login': () => import('./features/auth/pages/Login'),
-  '/register': () => import('./features/auth/pages/Register'),
-  '/submit': () => import('./features/submissions/pages/Submit'),
-  '/dashboard': () => import('./features/submissions/pages/Dashboard'),
-  '/payment': () => import('./features/submissions/pages/Payment'),
+  ...(REGISTRATIONS_OPEN
+    ? {
+        '/register': () => import('./features/auth/pages/Register'),
+        '/submit': () => import('./features/submissions/pages/Submit'),
+        '/dashboard': () => import('./features/submissions/pages/Dashboard'),
+        '/payment': () => import('./features/submissions/pages/Payment'),
+      }
+    : {}),
   '/admin/login': () => import('./features/admin/pages/AdminLogin'),
 };
 
@@ -105,37 +111,62 @@ function AppRoutes() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/fun-events" element={<FunEvents />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={
+            REGISTRATIONS_OPEN ? (
+              <Register />
+            ) : (
+              <RegistrationsClosed title="Registrations Closed" />
+            )
+          }
+        />
         <Route 
           path="/submit" 
           element={
-            <ProtectedRoute>
-              <Submit />
-            </ProtectedRoute>
+            REGISTRATIONS_OPEN ? (
+              <ProtectedRoute>
+                <Submit />
+              </ProtectedRoute>
+            ) : (
+              <RegistrationsClosed title="Submissions Closed" />
+            )
           } 
         />
         <Route
           path="/submit/workshop"
           element={
-            <ProtectedRoute>
-              <WorkshopSubmit />
-            </ProtectedRoute>
+            REGISTRATIONS_OPEN ? (
+              <ProtectedRoute>
+                <WorkshopSubmit />
+              </ProtectedRoute>
+            ) : (
+              <RegistrationsClosed title="Workshop Registrations Closed" />
+            )
           }
         />
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+            REGISTRATIONS_OPEN ? (
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            ) : (
+              <RegistrationsClosed title="Submission Dashboard Closed" />
+            )
           } 
         />
         <Route 
           path="/payment" 
           element={
-            <ProtectedRoute>
-              <Payment />
-            </ProtectedRoute>
+            REGISTRATIONS_OPEN ? (
+              <ProtectedRoute>
+                <Payment />
+              </ProtectedRoute>
+            ) : (
+              <RegistrationsClosed title="Payments Closed" />
+            )
           } 
         />
         

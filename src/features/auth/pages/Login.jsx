@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../../../platform/firebase/client';
 import { doc, getDoc } from 'firebase/firestore';
@@ -57,8 +57,8 @@ export default function Login() {
       if (userDoc.exists()) {
         navigate('/categories');
       } else {
-        // New Google user — send to register to fill details
-        navigate('/register');
+        setError('Registrations are closed for this season. You can still explore event pages.');
+        navigate('/categories');
       }
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
@@ -133,7 +133,7 @@ export default function Login() {
             </form>
 
             <div className="auth-footer">
-              <p>Don&apos;t have an account? <Link to="/register">Register</Link></p>
+              <p>Registrations are now closed for Lumiere 2026.</p>
             </div>
           </div>
         </div>
